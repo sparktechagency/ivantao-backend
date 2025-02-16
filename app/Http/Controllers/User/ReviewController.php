@@ -11,13 +11,14 @@ use Illuminate\Support\Facades\Validator;
 
 class ReviewController extends Controller
 {
+    //create review
     public function createReview(Request $request)
     {
         // Validate the request data
         $validator = Validator::make($request->all(), [
             'service_id' => 'required|exists:services,id',
             'comment' => 'nullable|string|max:500',
-            'rating' => 'nullable|integer|min:1|max:5',
+            'rating' => 'required|integer|min:1|max:5',
         ]);
 
         if (!$validator) {

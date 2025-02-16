@@ -3,6 +3,8 @@
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Provider\ServiceCategoryController;
 use App\Http\Controllers\Provider\ServiceController;
+use App\Http\Controllers\User\OfferPriceController;
+use App\Http\Controllers\User\ReviewController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -45,4 +47,19 @@ Route::middleware(['auth:api', 'provider'])->group(function () {
     Route::get('get-all-services', [ServiceController::class, 'getService']);
     Route::get('get-services-details/{id}', [ServiceController::class, 'servicesDetails']);
 
+    //route for service
+    Route::post('/offer-price/{id}', [OfferPriceController::class, 'updateOfferStatus']);
+    Route::get('/get-offer-price', [OfferPriceController::class, 'getOfferPrice']);
+
 });
+
+Route::middleware(['auth:api', 'user'])->group(function () {
+
+    //review
+    Route::post('reviews', [ReviewController::class, 'createReview']);
+    //service offer
+    Route::post('price-offer', [OfferPriceController::class, 'offerPrice']);
+
+});
+
+
