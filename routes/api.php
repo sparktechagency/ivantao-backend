@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Provider\ServiceCategoryController;
 use App\Http\Controllers\Provider\ServiceController;
 use App\Http\Controllers\User\OfferPriceController;
+use App\Http\Controllers\User\ReportController;
 use App\Http\Controllers\User\ReviewController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -59,6 +60,9 @@ Route::middleware(['auth:api', 'user'])->group(function () {
     Route::post('reviews', [ReviewController::class, 'createReview']);
     //service offer
     Route::post('price-offer', [OfferPriceController::class, 'offerPrice']);
+    //create report
+    Route::post('report', [ReportController::class, 'report']);
+
 
 });
 
