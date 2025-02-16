@@ -137,7 +137,7 @@ class ServiceController extends Controller
 
         return response()->json(['message' => 'Service deleted successfully']);
     }
-    public function getService(Request $request)
+    public function getAllService(Request $request)
     {
         $sort = $request->input('sort');
 

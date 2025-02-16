@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CommonMiddleware;
 use App\Http\Middleware\ProviderMiddleware;
 use App\Http\Middleware\SuperAdminMiddleware;
 use App\Http\Middleware\UserMiddleware;
@@ -16,9 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'super_admin' => SuperAdminMiddleware::class,
-            'provider'    => ProviderMiddleware::class,
-            'user'        => UserMiddleware::class,
+            'super_admin'         => SuperAdminMiddleware::class,
+            'provider'            => ProviderMiddleware::class,
+            'user'                => UserMiddleware::class,
+            'user.admin.provider' => CommonMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

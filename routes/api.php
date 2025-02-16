@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Message\MessageController;
 use App\Http\Controllers\Provider\ServiceCategoryController;
 use App\Http\Controllers\Provider\ServiceController;
 use App\Http\Controllers\User\OfferPriceController;
@@ -53,7 +54,8 @@ Route::middleware(['auth:api', 'provider'])->group(function () {
     Route::post('create-service', [ServiceController::class, 'createServices']);
     Route::post('update-service/{id}', [ServiceController::class, 'updateServices']);
     Route::delete('delete-service/{id}', [ServiceController::class, 'deleteService']);
-    Route::get('get-all-services', [ServiceController::class, 'getService']);
+    Route::get('get-all-services', [ServiceController::class, 'getAllService']);
+    Route::get('get-services', [ServiceController::class, 'getService']);
     Route::get('get-services-details/{id}', [ServiceController::class, 'servicesDetails']);
 
     //route for service
@@ -74,5 +76,19 @@ Route::middleware(['auth:api', 'user'])->group(function () {
 
 
 });
+Route::middleware(['auth:api', 'user.admin.provider'])->group(function () {
+
+    //message routes
+    Route::post('send-message', [MessageController::class, 'sendMessage']);
+    Route::get('get-message', [MessageController::class, 'getMessage']);
+    Route::get('read-message', [MessageController::class, 'readRead']);
+    // Route::get('search-new-user', [MessageController::class, 'searchNewUser']);
+    // Route::get('chat-list', [MessageController::class, 'chatList']);
+
+
+
+});
+
+
 
 
