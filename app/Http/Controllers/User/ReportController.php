@@ -3,7 +3,6 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\Report;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -13,42 +12,46 @@ class ReportController extends Controller
     public function report(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'reported_user_id' => 'required|exists:users,id',
+            'reported_user_id' => 'nullable|exists:users,id',
+            'service_id'       => 'nullable|exists:services,id',
             'reason'           => 'required|string',
-            'description'      => 'nullable|string',
+            'description'      => 'nullable|string|max:500',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['status' => false, 'message' => $validator->errors()], 422);
         }
 
-        $user         = Auth::user();
-        $reportedUser = User::find($request->reported_user_id);
-
-        // Check if the current user is a provider
-        if ($user->role !== 'user') {
-            return response()->json(['status'  => false,'message' => 'Only users can report a provider.',], 403);
-        }
-
-        // Check if the reported user is a provider
-        if ($reportedUser->role !== 'provider') {
-            return response()->json(['status'  => false,'message' => 'You can only report service providers.',], 403);
+        // Ensure either a user or a service is reported, but not both null
+        if (! $request->reported_user_id && ! $request->service_id) {
+            return response()->json(['status' => false, 'message' => 'Either a user or a service must be reported.'], 422);
         }
 
         $report = Report::create([
             'user_id'          => Auth::id(),
             'reported_user_id' => $request->reported_user_id,
+            'service_id'       => $request->service_id,
             'reason'           => $request->reason,
             'description'      => $request->description,
         ]);
 
-        $report->load('reportedUser:id,full_name','reporter:id,full_name');
-
         return response()->json([
             'status'  => true,
             'message' => 'Report submitted successfully.',
-            'data'    => $report,
+            'data'    => $report->load(['reportedUser:id,full_name', 'reportedService:id,title']),
         ], 201);
+    }
+
+    //report listing
+    public function reportlist()
+    {
+        $report_list = Report::with(['reportedUser:id,full_name,image','reporter:id,full_name,image','reportedService:id,title,service_type',])->paginate();
+
+        if ($report_list->isEmpty()) {
+            return response()->json(['status' => false, 'message' => 'There are no reports available.'], 401);
+        }
+
+        return response()->json(['status' => true, 'data' => $report_list], 200);
     }
 
 }

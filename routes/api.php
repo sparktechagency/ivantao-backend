@@ -29,6 +29,14 @@ Route::group(['prefix' => 'auth'], function ($router) {
     });
 
 });
+//super admin
+Route::middleware(['auth:api', 'super_admin'])->group(function () {
+    //listing report
+    Route::get('reportlist', [ReportController::class, 'reportlist']);
+
+
+});
+
 //provider route
 Route::middleware(['auth:api', 'provider'])->group(function () {
 
@@ -58,6 +66,7 @@ Route::middleware(['auth:api', 'user'])->group(function () {
 
     //review
     Route::post('reviews', [ReviewController::class, 'createReview']);
+    Route::get('reviewlist', [ReviewController::class, 'reviewList']);
     //service offer
     Route::post('price-offer', [OfferPriceController::class, 'offerPrice']);
     //create report

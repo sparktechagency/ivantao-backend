@@ -57,6 +57,7 @@ class OfferPriceController extends Controller
             'offer'   => $offer,
         ]);
     }
+    //provider get offer price list
     public function getOfferPrice()
     {
         $offer_price_list = OfferService::with(['user:id,full_name,image', 'service:id,title'])

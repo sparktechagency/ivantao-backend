@@ -19,7 +19,7 @@ class ServiceController extends Controller
             'title'                     => 'required|string|max:255',
             'description'               => 'required|string',
             'price'                     => 'required|string',
-            'service_type'              => 'required|in:virtual,in-person',
+            'service_type'              => 'nullable|in:virtual,in-person',
             'image'                     => 'nullable|image',
         ]);
 
@@ -139,34 +139,57 @@ class ServiceController extends Controller
     }
     public function getService(Request $request)
     {
-        $search = $request->input('search');
+        $sort = $request->input('sort');
 
-        $service_list = Services::with('subCategory');
+        $service_list = Services::with(['reviews:id,rating,user_id,service_id', 'reviews.user:id,full_name,image'])
+            ->withCount('reviews')
+            ->withAvg('reviews', 'rating');
 
-        if ($search) {
-            $service_list = $service_list->where('title', 'like', "%$search%");
+        // Apply sorting
+        if ($sort == 'price_asc') {
+            $service_list = $service_list->orderBy('price', 'asc');
+
+        } elseif ($sort == 'date_asc') {
+            $service_list = $service_list->orderBy('created_at', 'asc');
+        } elseif ($sort == 'date_desc') {
+            $service_list = $service_list->orderBy('created_at', 'desc');
+        } else {
+            $service_list = $service_list->orderBy('created_at', 'desc');
         }
 
+        // Paginate the result
         $service_list = $service_list->paginate();
 
         if ($service_list->isEmpty()) {
             return response()->json(['status' => false, 'message' => 'There is no data in the service list'], 401);
         }
+
         return response()->json(['status' => true, 'data' => $service_list], 200);
     }
+
     public function servicesDetails($id)
     {
-        $service = Services::with([
-            'provider:id,full_name,image',
-            'category:id,name,icon',
-            'subCategory:id,name,image',
-        ])->find($id);
+        $service = Services::find($id);
 
-        if (!$service) {
+        if (! $service) {
             return response()->json(['status' => false, 'message' => 'Service Not Found'], 401);
         }
 
-        return response()->json(['status' => true, 'data' => $service], 200);
+        $reviews = $service->reviews()->with('user:id,full_name,image')->get();
+
+        // Calculate the average rating and total number of reviews
+        $averageRating = $reviews->isEmpty() ? 0 : $reviews->avg('rating');
+        $totalReviews  = $reviews->count();
+
+        return response()->json([
+            'status' => true,
+            'data'   => [
+                'service'        => $service,
+                'reviews'        => $reviews,
+                'average_rating' => $averageRating,
+                'total_reviews'  => $totalReviews,
+            ],
+        ], 200);
     }
 
 }

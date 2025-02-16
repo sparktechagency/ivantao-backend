@@ -26,4 +26,10 @@ class Services extends Model
         $defaultImage = 'default_user.png';
         return asset('uploads/service_images/' . ($image ?? $defaultImage));
     }
+    public function reviews()
+{
+    return $this->hasMany(Review::class, 'service_id'); // Correct the foreign key to 'service_id'
+}
+
+
 }

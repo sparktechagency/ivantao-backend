@@ -13,9 +13,10 @@ return new class extends Migration
     {
         Schema::create('reports', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->nullable()->constrained('users')->cascadeOnDelete()->comment('reporter');
-            $table->foreignId('reported_user_id')->nullable()->constrained('users')->cascadeOnDelete()->comment('reported by user');
-            $table->string('reason')->default('Fraud');
+            $table->foreignId('user_id')->nullable()->constrained('users')->cascadeOnDelete()->comment('Reporter');
+            $table->foreignId('reported_user_id')->nullable()->constrained('users')->cascadeOnDelete()->comment('Reported user');
+            $table->foreignId('service_id')->nullable()->constrained('services')->cascadeOnDelete()->comment('Reported service');
+            $table->string('reason');
             $table->text('description')->nullable();
             $table->timestamps();
         });
