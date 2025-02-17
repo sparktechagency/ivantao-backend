@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Message\MessageController;
 use App\Http\Controllers\Provider\ServiceCategoryController;
 use App\Http\Controllers\Provider\ServiceController;
+use App\Http\Controllers\SuperAdmin\UserController;
 use App\Http\Controllers\User\OfferPriceController;
 use App\Http\Controllers\User\ReportController;
 use App\Http\Controllers\User\ReviewController;
@@ -34,6 +35,21 @@ Route::group(['prefix' => 'auth'], function ($router) {
 Route::middleware(['auth:api', 'super_admin'])->group(function () {
     //listing report
     Route::get('reportlist', [ReportController::class, 'reportlist']);
+    Route::get('report-details/{id}', [ReportController::class, 'reportDetails']);
+
+    //get user list
+    Route::get('user-list', [UserController::class, 'userList']);
+    Route::get('user-details/{id}', [UserController::class, 'userDetails']);
+    Route::delete('user-delete/{id}', [UserController::class, 'userDelete']);
+
+    //get provider list
+    Route::get('provider-list', [UserController::class, 'providerList']);
+    Route::get('provider-details/{id}', [UserController::class, 'providerDetails']); //after order table i can create this result
+    Route::delete('provider-delete/{id}', [UserController::class, 'providerDelete']);
+
+    //career section
+    Route::post('create-career', [ServiceController::class, 'createServices']);
+    Route::post('update-career/{id}', [ServiceController::class, 'updateServices']);
 
 
 });
@@ -42,8 +58,6 @@ Route::middleware(['auth:api', 'super_admin'])->group(function () {
 Route::middleware(['auth:api', 'provider'])->group(function () {
 
     //add category
-    Route::get('get-all-category', [ServiceCategoryController::class, 'getCategory']);
-    Route::get('get-all-subcategory', [ServiceCategoryController::class, 'getSubCategory']);
     Route::post('create-with-subcategory', [ServiceCategoryController::class, 'storeCategoryWithSubcategory']);
     Route::post('update-with-subcategory/{id}', [ServiceCategoryController::class, 'UpdateCategoryWithSubcategory']);
     Route::post('update-subcategory/{id}', [ServiceCategoryController::class, 'updateSubcategory']);
@@ -54,9 +68,6 @@ Route::middleware(['auth:api', 'provider'])->group(function () {
     Route::post('create-service', [ServiceController::class, 'createServices']);
     Route::post('update-service/{id}', [ServiceController::class, 'updateServices']);
     Route::delete('delete-service/{id}', [ServiceController::class, 'deleteService']);
-    Route::get('get-all-services', [ServiceController::class, 'getAllService']);
-    Route::get('get-services', [ServiceController::class, 'getService']);
-    Route::get('get-services-details/{id}', [ServiceController::class, 'servicesDetails']);
 
     //route for service
     Route::post('/offer-price/{id}', [OfferPriceController::class, 'updateOfferStatus']);
@@ -68,12 +79,10 @@ Route::middleware(['auth:api', 'user'])->group(function () {
 
     //review
     Route::post('reviews', [ReviewController::class, 'createReview']);
-    Route::get('reviewlist', [ReviewController::class, 'reviewList']);
     //service offer
     Route::post('price-offer', [OfferPriceController::class, 'offerPrice']);
     //create report
     Route::post('report', [ReportController::class, 'report']);
-
 
 });
 Route::middleware(['auth:api', 'user.admin.provider'])->group(function () {
@@ -87,6 +96,13 @@ Route::middleware(['auth:api', 'user.admin.provider'])->group(function () {
 
 });
 
+Route::middleware(['auth:api', 'user.provider'])->group(function () {
 
+    //get all category and subcategory list
+    Route::get('get-all-category', [ServiceCategoryController::class, 'getCategory']);
+    Route::get('get-all-subcategory', [ServiceCategoryController::class, 'getSubCategory']);
 
-
+    //get all services list and details
+    Route::get('get-all-services', [ServiceController::class, 'getAllService']);
+    Route::get('get-services-details/{id}', [ServiceController::class, 'servicesDetails']);
+});

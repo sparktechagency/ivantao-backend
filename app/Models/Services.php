@@ -27,9 +27,12 @@ class Services extends Model
         return asset('uploads/service_images/' . ($image ?? $defaultImage));
     }
     public function reviews()
-{
-    return $this->hasMany(Review::class, 'service_id'); // Correct the foreign key to 'service_id'
-}
-
+    {
+        return $this->hasMany(Review::class, 'service_id'); // Correct the foreign key to 'service_id'
+    }
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 
 }

@@ -53,5 +53,15 @@ class ReportController extends Controller
 
         return response()->json(['status' => true, 'data' => $report_list], 200);
     }
+    //report details
+    public function reportDetails(Request $request, $id)
+    {
+        $reports = Report::with('reportedUser:id,full_name,image','reportedService:id,title,service_type,created_at')->find($id);
+
+        if (! $reports) {
+            return response()->json(['status' => false, 'message' => 'Reports Not Found'], 401);
+        }
+        return response()->json(['status'=>true,'data'=>$reports],200);
+    }
 
 }

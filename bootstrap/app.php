@@ -21,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'provider'            => ProviderMiddleware::class,
             'user'                => UserMiddleware::class,
             'user.admin.provider' => CommonMiddleware::class,
+            'user.provider'       => CommonMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

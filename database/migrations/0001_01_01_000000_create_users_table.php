@@ -20,9 +20,7 @@ return new class extends Migration
             $table->longText('provider_description')->nullable();
             $table->string('address')->nullable();
             $table->string('contact')->nullable();
-            $table->longText('cover_letter')->nullable();
             $table->string('image')->nullable();
-            $table->json('document')->nullable();
             $table->string('password');
             $table->string('otp')->nullable();
             $table->timestamp('otp_expire_at')->nullable();
