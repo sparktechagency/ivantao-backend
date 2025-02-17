@@ -15,7 +15,7 @@ class MessageController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'receiver_id' => 'required|exists:users,id',
-            'content'     => 'required|string',
+            'message'     => 'required|string',
         ]);
 
         if ($validator->fails()) {
@@ -25,7 +25,7 @@ class MessageController extends Controller
         $message = Message::create([
             'sender_id'   => auth()->id(),
             'receiver_id' => $request->receiver_id,
-            'content'     => $request->content,
+            'message'     => $request->message,
             'is_read'     => false,
         ]);
 
@@ -101,6 +101,41 @@ class MessageController extends Controller
             'data'    => $users,
         ]);
     }
-    
+    //messagelist
+    public function messageList(Request $request)
+    {
+        $user_id = Auth::id();
+        $role    = $request->role;
+        $search  = $request->search;
+
+        // Fetch messages where the user is either sender or receiver
+        $message_list = Message::with(['receiver:id,full_name,image', 'sender:id,full_name,image'])
+            ->where(function ($query) use ($user_id) {
+                $query->where('sender_id', $user_id)
+                    ->orWhere('receiver_id', $user_id);
+            });
+
+            // return $request;
+        // Filter by role
+        if ($role) {
+            $message_list->whereHas('receiver', function ($query) use ($role, $search) {
+                $query->where('role', $role);
+                if ($search) {
+                    $query->where('full_name', 'like', '%' . $search . '%');
+                }
+            });
+        }
+
+        // Get latest messages and remove duplicates based on sender/receiver pair
+        $message_list = $message_list->latest('created_at')->get()->unique(function ($msg) use ($user_id) {
+            return $msg->sender_id === $user_id ? $msg->receiver_id : $msg->sender_id;
+        })->values();
+
+        return response()->json([
+            'status'  => true,
+            'message' => 'Messages Fetched successfully.',
+            'data'    => $message_list,
+        ]);
+    }
 
 }
