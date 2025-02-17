@@ -81,11 +81,9 @@ Route::middleware(['auth:api', 'user.admin.provider'])->group(function () {
     //message routes
     Route::post('send-message', [MessageController::class, 'sendMessage']);
     Route::get('get-message', [MessageController::class, 'getMessage']);
-    Route::get('read-message', [MessageController::class, 'readRead']);
-    // Route::get('search-new-user', [MessageController::class, 'searchNewUser']);
-    // Route::get('chat-list', [MessageController::class, 'chatList']);
-
-
+    Route::get('read-message', [MessageController::class, 'readMessage']);
+    Route::get('search-user', [MessageController::class, 'searchUser']);
+    Route::get('message-list', [MessageController::class, 'messageList']);
 
 });
 

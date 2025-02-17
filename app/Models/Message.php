@@ -1,19 +1,23 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
 class Message extends Model
 {
-    protected  $guarded=['id'];
+    protected $guarded = ['id'];
 
-    public function sender()
-    {
-        $this->belongsTo(User::class);
+    public function sender() {
+        return $this->belongsTo(User::class, 'sender_id');
     }
-    public function receiver()
-    {
-        $this->belongsTo(User::class);
+
+    public function receiver() {
+        return $this->belongsTo(User::class, 'receiver_id');
     }
+
+    public function scopeWhereUnread($query)
+    {
+        return $query->where('is_read', 0);
+    }
+
 }
