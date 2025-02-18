@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Message\MessageController;
 use App\Http\Controllers\Provider\ServiceCategoryController;
 use App\Http\Controllers\Provider\ServiceController;
+use App\Http\Controllers\SuperAdmin\ApplyFormController;
 use App\Http\Controllers\SuperAdmin\CareerController;
 use App\Http\Controllers\SuperAdmin\UserController;
 use App\Http\Controllers\User\OfferPriceController;
@@ -54,6 +55,12 @@ Route::middleware(['auth:api', 'super_admin'])->group(function () {
     Route::post('update-career/{id}', [CareerController::class, 'updateCareer']);
     Route::delete('delete-career/{id}', [CareerController::class, 'deleteCareer']);
 
+    //applied user list
+    Route::get('list-applied-user/{career_id}', [ApplyFormController::class, 'appliedUsersList']);
+    Route::get('details-applied-user/{id}', [ApplyFormController::class, 'appliedUsersDetails']);
+    Route::post('/application-status/{id}', [ApplyFormController::class, 'updateApplicationStatus']);
+
+
 });
 
 //provider route
@@ -85,6 +92,10 @@ Route::middleware(['auth:api', 'user'])->group(function () {
     Route::post('price-offer', [OfferPriceController::class, 'offerPrice']);
     //create report
     Route::post('report', [ReportController::class, 'report']);
+
+    //apply form
+    Route::post('apply-form', [ApplyFormController::class, 'applyForm']);
+
 
 });
 Route::middleware(['auth:api', 'user.admin.provider'])->group(function () {

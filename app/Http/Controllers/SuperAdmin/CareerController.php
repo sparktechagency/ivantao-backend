@@ -179,5 +179,6 @@ class CareerController extends Controller
             'posted_on' => $posted_on, // Add the date the job was posted
         ], 200);
     }
+    
 
 }

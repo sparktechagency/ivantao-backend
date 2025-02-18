@@ -10,6 +10,6 @@ class Career extends Model
 
     public function appliedUsers()
     {
-        return $this->hasMany(ApplyForm::class, 'carrer_id');
+        return $this->hasMany(ApplyForm::class, 'career_id');
     }
 }

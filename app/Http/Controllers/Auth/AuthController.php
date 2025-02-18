@@ -172,12 +172,10 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'full_name'            => 'nullable|string|max:255',
             'provider_description' => 'nullable|string',
-            'cover_letter'         => 'nullable|string',
             'address'              => 'nullable|string|max:255',
             'contact'              => 'nullable|string|max:16',
             'password'             => 'nullable|string|min:6|confirmed',
             'image'                => 'nullable|file',
-            'documents.*'          => 'nullable|file',
         ]);
 
         if ($validator->fails()) {
@@ -190,7 +188,6 @@ class AuthController extends Controller
         $user->address              = $validatedData['address'] ?? $user->address;
         $user->contact              = $validatedData['contact'] ?? $user->contact;
         $user->provider_description = $validatedData['provider_description'] ?? $user->provider_description;
-        $user->cover_letter         = $validatedData['cover_letter'] ?? $user->cover_letter;
 
         if (! empty($validatedData['password'])) {
             $user->password = Hash::make($validatedData['password']);
@@ -214,30 +211,6 @@ class AuthController extends Controller
             $image->move(public_path('uploads/profile_images'), $newName);
 
             $user->image = $newName;
-        }
-        //delete old document
-        if ($request->hasFile('documents')) {
-            $existingDocuments = $user->document;
-
-            if (is_array($existingDocuments)) {
-                foreach ($existingDocuments as $document) {
-                    $relativePath = parse_url($document, PHP_URL_PATH);
-                    $relativePath = ltrim($relativePath, '/');
-                    unlink(public_path($relativePath));
-                }
-            }
-
-            // Upload new documents
-            $newDocuments = [];
-            foreach ($request->file('documents') as $document) {
-                $documentName = time() . uniqid() . $document->getClientOriginalName();
-                $document->move(public_path('uploads/documents'), $documentName);
-
-                $newDocuments[] = $documentName;
-            }
-
-            // Save the new documents as a JSON-encoded array
-            $user->document = json_encode($newDocuments);
         }
         $user->save();
 

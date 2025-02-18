@@ -54,15 +54,7 @@ class User extends Authenticatable implements JWTSubject
         $defaultImage = 'default_user.png';
         return asset('uploads/profile_images/' . ($image ?? $defaultImage));
     }
-    public function getDocumentAttribute($document)
-    {
-        $documents = json_decode($document, true);
-        if (is_array($documents)) {
-            return array_map(function ($doc) {
-                return asset('uploads/documents/' . $doc);
-            }, $documents);
-        }
-    }
+    
     //connection with services
     public function services()
     {

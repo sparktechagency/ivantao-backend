@@ -13,11 +13,12 @@ return new class extends Migration
     {
         Schema::create('apply_forms', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('carrer_id')->nullable()->constrained('careers')->cascadeOnDelete();
+            $table->foreignId('career_id')->nullable()->constrained('careers')->cascadeOnDelete();
             $table->string('name');
             $table->string('email')->unique();
             $table->longText('cover_letter')->nullable();
-            $table->json('document')->nullable();
+            $table->string('document')->nullable();
+            $table->enum('application_status', ['pending', 'approve','reject'])->default('pending');
             $table->timestamps();
         });
     }
