@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Message\MessageController;
 use App\Http\Controllers\Provider\ServiceCategoryController;
 use App\Http\Controllers\Provider\ServiceController;
+use App\Http\Controllers\SuperAdmin\CareerController;
 use App\Http\Controllers\SuperAdmin\UserController;
 use App\Http\Controllers\User\OfferPriceController;
 use App\Http\Controllers\User\ReportController;
@@ -48,9 +49,10 @@ Route::middleware(['auth:api', 'super_admin'])->group(function () {
     Route::delete('provider-delete/{id}', [UserController::class, 'providerDelete']);
 
     //career section
-    Route::post('create-career', [ServiceController::class, 'createServices']);
-    Route::post('update-career/{id}', [ServiceController::class, 'updateServices']);
-
+    Route::get('list-career', [CareerController::class, 'careerList']);
+    Route::post('create-career', [CareerController::class, 'createCareer']);
+    Route::post('update-career/{id}', [CareerController::class, 'updateCareer']);
+    Route::delete('delete-career/{id}', [CareerController::class, 'deleteCareer']);
 
 });
 
@@ -105,4 +107,9 @@ Route::middleware(['auth:api', 'user.provider'])->group(function () {
     //get all services list and details
     Route::get('get-all-services', [ServiceController::class, 'getAllService']);
     Route::get('get-services-details/{id}', [ServiceController::class, 'servicesDetails']);
+
+    //job list
+    Route::get('list-job', [CareerController::class, 'jobList']);
+    Route::get('job-details/{id}', [CareerController::class, 'careerDetails']);
+
 });
