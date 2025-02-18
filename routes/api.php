@@ -7,6 +7,8 @@ use App\Http\Controllers\Provider\ServiceController;
 use App\Http\Controllers\SuperAdmin\ApplyFormController;
 use App\Http\Controllers\SuperAdmin\CareerController;
 use App\Http\Controllers\SuperAdmin\UserController;
+use App\Http\Controllers\User\CommunityForumController;
+use App\Http\Controllers\User\CommunityForumReportController;
 use App\Http\Controllers\User\OfferPriceController;
 use App\Http\Controllers\User\ReportController;
 use App\Http\Controllers\User\ReviewController;
@@ -60,7 +62,6 @@ Route::middleware(['auth:api', 'super_admin'])->group(function () {
     Route::get('details-applied-user/{id}', [ApplyFormController::class, 'appliedUsersDetails']);
     Route::post('/application-status/{id}', [ApplyFormController::class, 'updateApplicationStatus']);
 
-
 });
 
 //provider route
@@ -93,10 +94,6 @@ Route::middleware(['auth:api', 'user'])->group(function () {
     //create report
     Route::post('report', [ReportController::class, 'report']);
 
-    //apply form
-    Route::post('apply-form', [ApplyFormController::class, 'applyForm']);
-
-
 });
 Route::middleware(['auth:api', 'user.admin.provider'])->group(function () {
 
@@ -106,6 +103,10 @@ Route::middleware(['auth:api', 'user.admin.provider'])->group(function () {
     Route::get('read-message', [MessageController::class, 'readMessage']);
     Route::get('search-user', [MessageController::class, 'searchUser']);
     Route::get('message-list', [MessageController::class, 'messageList']);
+
+    //forum list
+    Route::get('forum-list', [CommunityForumController::class, 'communityForumList']);
+
 
 });
 
@@ -122,5 +123,11 @@ Route::middleware(['auth:api', 'user.provider'])->group(function () {
     //job list
     Route::get('list-job', [CareerController::class, 'jobList']);
     Route::get('job-details/{id}', [CareerController::class, 'careerDetails']);
+
+    //forum post
+    Route::post('forum-post', [CommunityForumController::class, 'forumPost']);
+
+    //forum report
+    Route::post('forum-report', [CommunityForumReportController::class, 'forumReport']);
 
 });
