@@ -6,10 +6,12 @@ use App\Http\Controllers\Provider\ServiceCategoryController;
 use App\Http\Controllers\Provider\ServiceController;
 use App\Http\Controllers\SuperAdmin\ApplyFormController;
 use App\Http\Controllers\SuperAdmin\CareerController;
+use App\Http\Controllers\SuperAdmin\ContactUsController;
 use App\Http\Controllers\SuperAdmin\SettingController;
 use App\Http\Controllers\SuperAdmin\UserController;
 use App\Http\Controllers\User\CommunityForumController;
 use App\Http\Controllers\User\CommunityForumReportController;
+use App\Http\Controllers\User\ContactWithAdminController;
 use App\Http\Controllers\User\OfferPriceController;
 use App\Http\Controllers\User\ReportController;
 use App\Http\Controllers\User\ReviewController;
@@ -70,6 +72,10 @@ Route::middleware(['auth:api', 'super_admin'])->group(function () {
     //about us and how it works add by super admin
     Route::post('create-setting', [SettingController::class, 'createSetting']);
 
+    //create contact page
+    Route::post('create-contact', [ContactUsController::class, 'createContact']);
+    Route::post('contact-info', [ContactUsController::class, 'contactInfo']);
+
 });
 
 //provider route
@@ -115,7 +121,6 @@ Route::middleware(['auth:api', 'user.admin.provider'])->group(function () {
     //forum list
     Route::get('forum-list', [CommunityForumController::class, 'communityForumList']);
 
-
 });
 
 Route::middleware(['auth:api', 'user.provider'])->group(function () {
@@ -140,6 +145,8 @@ Route::middleware(['auth:api', 'user.provider'])->group(function () {
     //setting list
     Route::get('settings', [SettingController::class, 'settingList']);
 
-
+    //contact get
+    Route::get('contact-show', [ContactUsController::class, 'contactShow']);
+    Route::post('contact-message', [ContactWithAdminController::class, 'contactMessage']);
 
 });
