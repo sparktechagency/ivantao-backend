@@ -62,6 +62,11 @@ Route::middleware(['auth:api', 'super_admin'])->group(function () {
     Route::get('details-applied-user/{id}', [ApplyFormController::class, 'appliedUsersDetails']);
     Route::post('/application-status/{id}', [ApplyFormController::class, 'updateApplicationStatus']);
 
+    //forum report list
+    Route::get('list-forum-report', [CommunityForumReportController::class, 'forumReportList']);
+    Route::get('forum-report-details/{forum_id}', [CommunityForumReportController::class, 'forumReportDetails']);
+
+
 });
 
 //provider route

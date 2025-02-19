@@ -3,7 +3,6 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\CommunityForum;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -60,13 +59,7 @@ class CommunityForumController extends Controller
         if ($forum_list->isEmpty()) {
             return response()->json(['status' => false, 'message' => 'There is no data in the forum post list'], 401);
         }
-
-        // Convert created_at to "time ago" format
-        $forum_list->getCollection()->transform(function ($forum) {
-            $forum->time_ago = Carbon::parse($forum->created_at)->diffForHumans();
-            return $forum;
-        });
-
+        
         return response()->json(['status' => true, 'data' => $forum_list], 200);
     }
 
