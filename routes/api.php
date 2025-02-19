@@ -6,6 +6,7 @@ use App\Http\Controllers\Provider\ServiceCategoryController;
 use App\Http\Controllers\Provider\ServiceController;
 use App\Http\Controllers\SuperAdmin\ApplyFormController;
 use App\Http\Controllers\SuperAdmin\CareerController;
+use App\Http\Controllers\SuperAdmin\SettingController;
 use App\Http\Controllers\SuperAdmin\UserController;
 use App\Http\Controllers\User\CommunityForumController;
 use App\Http\Controllers\User\CommunityForumReportController;
@@ -60,12 +61,14 @@ Route::middleware(['auth:api', 'super_admin'])->group(function () {
     //applied user list
     Route::get('list-applied-user/{career_id}', [ApplyFormController::class, 'appliedUsersList']);
     Route::get('details-applied-user/{id}', [ApplyFormController::class, 'appliedUsersDetails']);
-    Route::post('/application-status/{id}', [ApplyFormController::class, 'updateApplicationStatus']);
+    Route::post('application-status/{id}', [ApplyFormController::class, 'updateApplicationStatus']);
 
     //forum report list
     Route::get('list-forum-report', [CommunityForumReportController::class, 'forumReportList']);
     Route::get('forum-report-details/{forum_id}', [CommunityForumReportController::class, 'forumReportDetails']);
 
+    //about us and how it works add by super admin
+    Route::post('create-setting', [SettingController::class, 'createSetting']);
 
 });
 
@@ -134,5 +137,9 @@ Route::middleware(['auth:api', 'user.provider'])->group(function () {
 
     //forum report
     Route::post('forum-report', [CommunityForumReportController::class, 'forumReport']);
+    //setting list
+    Route::get('settings', [SettingController::class, 'settingList']);
+
+
 
 });
