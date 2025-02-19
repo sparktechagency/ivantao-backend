@@ -43,6 +43,7 @@ Route::middleware(['auth:api', 'super_admin'])->group(function () {
     //listing report
     Route::get('reportlist', [ReportController::class, 'reportlist']);
     Route::get('report-details/{id}', [ReportController::class, 'reportDetails']);
+    Route::delete('report-delete/{id}', [ReportController::class, 'deleteReport']);
 
     //get user list
     Route::get('user-list', [UserController::class, 'userList']);
@@ -94,8 +95,9 @@ Route::middleware(['auth:api', 'provider'])->group(function () {
     Route::delete('delete-service/{id}', [ServiceController::class, 'deleteService']);
 
     //route for service
-    Route::post('/offer-price/{id}', [OfferPriceController::class, 'updateOfferStatus']);
     Route::get('/get-offer-price', [OfferPriceController::class, 'getOfferPrice']);
+    Route::post('/offer-price-status/{id}', [OfferPriceController::class, 'updateOfferStatus']);
+    Route::delete('/delete-offer-price/{id}', [OfferPriceController::class, 'deleteOfferPrice']);
 
 });
 

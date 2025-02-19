@@ -69,5 +69,20 @@ class OfferPriceController extends Controller
 
         return response()->json(['status' => true, 'data' => $offer_price_list], 200);
     }
+    //delete offer price
+    public function deleteOfferPrice($id)
+    {
+        $offer_price = OfferService::find($id);
+
+        if (! $offer_price) {
+            return response()->json(['status' => false, 'message' => 'Offer Price For Service Not Found'], 401);
+        }
+
+        $offer_price->delete();
+
+        return response()->json([
+            'status'=>true,
+            'message' => 'Service deleted successfully']);
+    }
 
 }

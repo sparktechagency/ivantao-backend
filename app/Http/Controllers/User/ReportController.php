@@ -63,5 +63,19 @@ class ReportController extends Controller
         }
         return response()->json(['status'=>true,'data'=>$reports],200);
     }
+    public function deleteReport($id)
+    {
+        $report = Report::find($id);
+
+        if (! $report) {
+            return response()->json(['status' => false, 'message' => 'Report For Service Not Found'], 401);
+        }
+
+        $report->delete();
+
+        return response()->json([
+            'status'=>true,
+            'message' => 'Service deleted successfully']);
+    }
 
 }
