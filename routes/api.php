@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Message\MessageController;
 use App\Http\Controllers\Provider\ServiceCategoryController;
 use App\Http\Controllers\Provider\ServiceController;
+use App\Http\Controllers\Provider\WithdrawController;
 use App\Http\Controllers\SuperAdmin\ApplyFormController;
 use App\Http\Controllers\SuperAdmin\CareerController;
 use App\Http\Controllers\SuperAdmin\ContactUsController;
@@ -11,8 +12,10 @@ use App\Http\Controllers\SuperAdmin\SettingController;
 use App\Http\Controllers\SuperAdmin\UserController;
 use App\Http\Controllers\User\CommunityForumController;
 use App\Http\Controllers\User\CommunityForumReportController;
+use App\Http\Controllers\User\ConnectedAccountController;
 use App\Http\Controllers\User\ContactWithAdminController;
 use App\Http\Controllers\User\OfferPriceController;
+use App\Http\Controllers\User\OrderController;
 use App\Http\Controllers\User\ReportController;
 use App\Http\Controllers\User\ReviewController;
 use Illuminate\Http\Request;
@@ -69,6 +72,8 @@ Route::middleware(['auth:api', 'super_admin'])->group(function () {
     //forum report list
     Route::get('list-forum-report', [CommunityForumReportController::class, 'forumReportList']);
     Route::get('forum-report-details/{forum_id}', [CommunityForumReportController::class, 'forumReportDetails']);
+    Route::delete('forum-delete/{id}', [CommunityForumController::class, 'deleteCommnityForum']);
+    Route::delete('forum-report-delete/{id}', [CommunityForumReportController::class, 'deleteForumReport']);
 
     //about us and how it works add by super admin
     Route::post('create-setting', [SettingController::class, 'createSetting']);
@@ -77,10 +82,24 @@ Route::middleware(['auth:api', 'super_admin'])->group(function () {
     Route::post('create-contact', [ContactUsController::class, 'createContact']);
     Route::post('contact-info', [ContactUsController::class, 'contactInfo']);
 
+    //approved withdraw request
+    Route::post('approve-withdraw/{withdrawId}', [WithdrawController::class, 'approveWithdraw']);
+
+
+
 });
 
 //provider route
 Route::middleware(['auth:api', 'provider'])->group(function () {
+    //connected account
+    Route::post('account-create', [ConnectedAccountController::class, 'createAccount'])->name('account-create');
+    Route::get('account-refresh', [ConnectedAccountController::class, 'refreshAccount'])->name('account-refresh');
+    Route::get('show-account', [ConnectedAccountController::class, 'showAccount'])->name('show-update');
+    Route::delete('delete-accounts/{accountId}', [ConnectedAccountController::class, 'deleteAccount'])->name('account-delete');
+
+
+    //withdraw money
+    Route::post('request-withdraw', [WithdrawController::class, 'requestWithdraw']);
 
     //add category
     Route::post('create-with-subcategory', [ServiceCategoryController::class, 'storeCategoryWithSubcategory']);
@@ -95,10 +114,13 @@ Route::middleware(['auth:api', 'provider'])->group(function () {
     Route::delete('delete-service/{id}', [ServiceController::class, 'deleteService']);
 
     //route for service
-    Route::get('/get-offer-price', [OfferPriceController::class, 'getOfferPrice']);
-    Route::post('/offer-price-status/{id}', [OfferPriceController::class, 'updateOfferStatus']);
-    Route::delete('/delete-offer-price/{id}', [OfferPriceController::class, 'deleteOfferPrice']);
+    Route::get('get-offer-price', [OfferPriceController::class, 'getOfferPrice']);
+    Route::post('offer-price-status/{id}', [OfferPriceController::class, 'updateOfferStatus']);
+    Route::delete('delete-offer-price/{id}', [OfferPriceController::class, 'deleteOfferPrice']);
 
+
+    //get order list
+    Route::get('order-list', [OrderController::class, 'orderlist']);
 });
 
 Route::middleware(['auth:api', 'user'])->group(function () {
@@ -150,5 +172,9 @@ Route::middleware(['auth:api', 'user.provider'])->group(function () {
     //contact get
     Route::get('contact-show', [ContactUsController::class, 'contactShow']);
     Route::post('contact-message', [ContactWithAdminController::class, 'contactMessage']);
+
+    //order
+    Route::post('order-payment', [OrderController::class, 'createPaymentIntent']);
+    Route::post('create-order', [OrderController::class, 'paymentSuccess']);
 
 });

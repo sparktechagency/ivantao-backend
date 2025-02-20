@@ -35,9 +35,12 @@ class User extends Authenticatable implements JWTSubject
         return [
             'email_verified_at' => 'datetime',
             'password'          => 'hashed',
+            'completed_stripe_onboarding' => 'bool',
+
             // 'document' => 'array',
         ];
     }
+
     public function getJWTIdentifier()
     {
         return $this->getKey();
@@ -54,7 +57,7 @@ class User extends Authenticatable implements JWTSubject
         $defaultImage = 'default_user.png';
         return asset('uploads/profile_images/' . ($image ?? $defaultImage));
     }
-    
+
     //connection with services
     public function services()
     {
@@ -67,6 +70,11 @@ class User extends Authenticatable implements JWTSubject
     public function servicesTaken()
     {
         return $this->hasManyThrough(Services::class, 'provider_id', 'service_id');
+    }
+    //money withdraw model
+    public function withdrawMoney()
+    {
+        return $this->hasMany(WithdrawMoney::class, 'provider_id');
     }
 
 }

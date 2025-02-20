@@ -59,8 +59,20 @@ class CommunityForumController extends Controller
         if ($forum_list->isEmpty()) {
             return response()->json(['status' => false, 'message' => 'There is no data in the forum post list'], 401);
         }
-        
+
         return response()->json(['status' => true, 'data' => $forum_list], 200);
+    }
+    public function deleteCommnityForum($id)
+    {
+        $forum = CommunityForum::find($id);
+
+        if (! $forum) {
+            return response()->json(['status' => false, 'message' => 'Community Forum Not Found'], 401);
+        }
+
+        $forum->delete();
+
+        return response()->json(['message' => 'Community Forum deleted successfully']);
     }
 
 }

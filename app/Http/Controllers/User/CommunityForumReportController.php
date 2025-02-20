@@ -60,5 +60,17 @@ class CommunityForumReportController extends Controller
 
         return response()->json(['status' => true, 'data' => $report_forum_details], 200);
     }
+    public function deleteForumReport($id)
+    {
+        $forum_report = CommunityForumReport::find($id);
+
+        if (! $forum_report) {
+            return response()->json(['status' => false, 'message' => 'Report of Community Forum  Not Found'], 401);
+        }
+
+        $forum_report->delete();
+
+        return response()->json(['message' => 'Report of Community Forum  deleted successfully']);
+    }
 
 }
