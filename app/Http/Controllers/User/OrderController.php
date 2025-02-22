@@ -71,56 +71,53 @@ class OrderController extends Controller
         try {
             $paymentIntent = PaymentIntent::retrieve($request->payment_intent_id);
 
-            if ($paymentIntent->status === 'succeeded') {
-                $service = Services::find($request->service_id);
-                if (! $service) {
-                    return response()->json(['status' => false, 'message' => 'Service not found.'], 401);
-                }
-
-                $user = User::find($request->user_id);
-                if (! $user) {
-                    return response()->json(['status' => false, 'message' => 'User not found.'], 401);
-                }
-
-                $order = Order::create([
-                    'user_id'        => $request->user_id,
-                    'provider_id'    => $service->provider_id,
-                    'service_id'     => $request->service_id,
-                    'transaction_id' => $paymentIntent->id,
-                    'amount'         => $paymentIntent->amount / 100, // Convert cents to dollars
-                    'status'         => 'completed',
-                    'start_date'     => $request->start_date,
-                    'end_date'       => $request->end_date,
-                    'start_time'     => $request->start_time,
-                    'end_time'       => $request->end_time,
-                ]);
-
-                $service->increment('booking_count');
-                $service->save();
-
-                return response()->json([
-                    'status'  => true,
-                    'message' => 'Payment recorded successfully',
-                    'data'    => $order,
-                ], 200);
-            } else {
+            if ($paymentIntent->status !== 'succeeded') {
                 return response()->json([
                     'status'  => false,
-                    'message' => 'Payment failed or not yet confirmed. Status: ' . $paymentIntent->status,
+                    'message' => 'Payment failed or not confirmed. Status: ' . $paymentIntent->status,
                 ], 400);
             }
+
+            $service = Services::findOrFail($request->service_id);
+            $user    = User::findOrFail($request->user_id);
+
+            // Create the order
+            $order = Order::create([
+                'user_id'        => $user->id,
+                'provider_id'    => $service->provider_id,
+                'service_id'     => $service->id,
+                'transaction_id' => $paymentIntent->id,
+                'amount'         => $paymentIntent->amount / 100,
+                'status'         => 'completed',
+                'start_date'     => $request->start_date,
+                'end_date'       => $request->end_date,
+                'start_time'     => $request->start_time,
+                'end_time'       => $request->end_time,
+            ]);
+
+            $service->increment('booking_count');
+
+            // Fetch the provider's information
+            $provider = User::find($service->provider_id);
+
+            // return $provider;
+            return response()->json([
+                'status'   => true,
+                'message'  => 'Payment recorded successfully',
+                'data'     => $order,
+                'provider' => $provider, // Include the provider's information
+            ], 200);
+
         } catch (Exception $e) {
             Log::error($e->getMessage());
-            return response()->json([
-                'status'  => false,
-                'message' => 'Payment recording failed: ' . $e->getMessage(),
-            ], 500);
+            return response()->json(['status' => false, 'message' => 'Payment recording failed: ' . $e->getMessage()], 500);
         }
     }
+
     //order list
     public function orderlist()
     {
-        $order_list = Order::with(['user:id,full_name,image', 'service:id,title'])
+        $order_list = Order::with(['user:id,full_name,image', 'service:id,title', 'provider:id,full_name'])
             ->paginate();
 
         if ($order_list->isEmpty()) {

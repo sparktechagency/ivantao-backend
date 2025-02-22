@@ -9,6 +9,7 @@ use App\Http\Controllers\SuperAdmin\ApplyFormController;
 use App\Http\Controllers\SuperAdmin\CareerController;
 use App\Http\Controllers\SuperAdmin\ContactUsController;
 use App\Http\Controllers\SuperAdmin\SettingController;
+use App\Http\Controllers\SuperAdmin\TransactionController;
 use App\Http\Controllers\SuperAdmin\UserController;
 use App\Http\Controllers\User\CommunityForumController;
 use App\Http\Controllers\User\CommunityForumReportController;
@@ -18,6 +19,7 @@ use App\Http\Controllers\User\OfferPriceController;
 use App\Http\Controllers\User\OrderController;
 use App\Http\Controllers\User\ReportController;
 use App\Http\Controllers\User\ReviewController;
+use App\Http\Controllers\User\SubscribeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -33,6 +35,9 @@ Route::group(['prefix' => 'auth'], function ($router) {
     Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
     Route::post('reset-password', [AuthController::class, 'resetPassword']);
     Route::post('resend-otp', [AuthController::class, 'resendOtp']);
+    //subscribe
+    Route::post('subscribe-join', [SubscribeController::class, 'subscribeJoin']);
+
     Route::middleware('auth:api')->group(function () {
         Route::get('own-profile', [AuthController::class, 'ownProfile']);
         Route::post('profile-update', [AuthController::class, 'updateProfile']);
@@ -43,6 +48,9 @@ Route::group(['prefix' => 'auth'], function ($router) {
 });
 //super admin
 Route::middleware(['auth:api', 'super_admin'])->group(function () {
+    //subscriber list
+    Route::get('subscribe-list', [SubscribeController::class, 'subscribeList']);
+    Route::delete('subscribe-delete/{id}', [SubscribeController::class, 'deleteSubscribe']);
     //listing report
     Route::get('reportlist', [ReportController::class, 'reportlist']);
     Route::get('report-details/{id}', [ReportController::class, 'reportDetails']);
@@ -85,7 +93,8 @@ Route::middleware(['auth:api', 'super_admin'])->group(function () {
     //approved withdraw request
     Route::post('approve-withdraw/{withdrawId}', [WithdrawController::class, 'approveWithdraw']);
 
-
+    //Transaction
+    Route::get('transaction', [TransactionController::class, 'Transaction']);
 
 });
 
@@ -97,9 +106,10 @@ Route::middleware(['auth:api', 'provider'])->group(function () {
     Route::get('show-account', [ConnectedAccountController::class, 'showAccount'])->name('show-update');
     Route::delete('delete-accounts/{accountId}', [ConnectedAccountController::class, 'deleteAccount'])->name('account-delete');
 
-
     //withdraw money
     Route::post('request-withdraw', [WithdrawController::class, 'requestWithdraw']);
+    Route::get('withdraw-money', [WithdrawController::class, 'getWithdrawMoney']);
+    Route::get('withdraw-history', [WithdrawController::class, 'withdrawHistory']);
 
     //add category
     Route::post('create-with-subcategory', [ServiceCategoryController::class, 'storeCategoryWithSubcategory']);
@@ -117,7 +127,6 @@ Route::middleware(['auth:api', 'provider'])->group(function () {
     Route::get('get-offer-price', [OfferPriceController::class, 'getOfferPrice']);
     Route::post('offer-price-status/{id}', [OfferPriceController::class, 'updateOfferStatus']);
     Route::delete('delete-offer-price/{id}', [OfferPriceController::class, 'deleteOfferPrice']);
-
 
     //get order list
     Route::get('order-list', [OrderController::class, 'orderlist']);
