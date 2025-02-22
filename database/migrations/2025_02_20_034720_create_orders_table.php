@@ -18,7 +18,8 @@ return new class extends Migration
             $table->foreignId('service_id')->constrained('services')->cascadeOnDelete();
             $table->string('transaction_id')->nullable();
             $table->decimal('amount', 8, 2);
-            $table->date('start_date')->nullable(); 
+            $table->decimal('platform_fee', 8, 2);
+            $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
             $table->time('start_time')->nullable();
             $table->time('end_time')->nullable();

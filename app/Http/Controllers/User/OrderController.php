@@ -18,29 +18,41 @@ class OrderController extends Controller
     public function createPaymentIntent(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'amount'         => 'required|numeric|min:1',
-            'payment_method' => 'required|string',
-
+            'amount'                  => 'required|numeric|min:1',
+            'platform_fee'  => 'required|numeric|min:0|max:100',
+            'payment_method'           => 'required|string',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['status' => false, 'message' => $validator->errors()], 400);
         }
 
+        // Get values from request
+        $amount = $request->amount;
+        $platformFeePercentage = $request->platform_fee;
+
+        // Calculate platform fee
+        $platformFee = ($amount * $platformFeePercentage) / 100;
+
+        // Calculate total amount (amount + platform fee)
+        $totalAmount = $amount + $platformFee;
+
         Stripe::setApiKey(env('STRIPE_SECRET'));
 
         try {
             $paymentIntent = PaymentIntent::create([
-                'amount'         => $request->amount * 100,
+                'amount'         => $totalAmount * 100, // Convert to cents
                 'currency'       => 'usd',
                 'payment_method' => $request->payment_method,
-                // 'confirmation_method' => 'manual',
                 'confirm'        => false,
             ]);
 
             return response()->json([
-                'status' => true,
-                'data'   => $paymentIntent,
+                'status'       => true,
+                'data'         => $paymentIntent,
+                'amount'       => $amount,
+                'platform_fee' => $platformFee,
+                'total_amount' => $totalAmount,
             ], 200);
 
         } catch (Exception $e) {
