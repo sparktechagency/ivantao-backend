@@ -3,6 +3,7 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\Fees;
+use App\Models\OfferService;
 use App\Models\Order;
 use App\Models\Services;
 use App\Models\User;
@@ -16,129 +17,147 @@ use Stripe\Stripe;
 class OrderController extends Controller
 {
     //create payment intent
-     public function createPaymentIntent(Request $request)
-     {
-         $validator = Validator::make($request->all(), [
-             'service_id'      => 'required|exists:services,id', 
-             'payment_method'  => 'required|string',
-         ]);
+    public function createPaymentIntent(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'service_id'     => 'required|exists:services,id',
+            'payment_method' => 'required|string',
+        ]);
 
-         if ($validator->fails()) {
-             return response()->json(['status' => false, 'message' => $validator->errors()], 422);
-         }
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => $validator->errors()], 422);
+        }
 
-         Stripe::setApiKey(env('STRIPE_SECRET'));
+        Stripe::setApiKey(env('STRIPE_SECRET'));
 
-         try {
-             $service = Services::find($request->service_id);
-             if (! $service) {
-                 return response()->json(['status' => false, 'message' => 'Service not found.'], 401);
-             }
+        try {
+            $service = Services::find($request->service_id);
+            if (! $service) {
+                return response()->json(['status' => false, 'message' => 'Service not found.'], 401);
+            }
 
-             $amount = $service->price;
+            // Check if an offer exists for this service and if it's accepted
+            $offer = OfferService::where('service_id', $request->service_id)
+                ->where('user_id', auth()->id())
+                ->where('offer_status', 'accepted')
+                ->first();
 
-             // Create the payment intent with the full amount (before deducting the platform fee)
-             $paymentIntent = PaymentIntent::create([
-                 'amount'         => $amount * 100, // Convert to cents for Stripe
-                 'currency'       => 'usd',
-                 'payment_method' => $request->payment_method,
-                 'confirm'        => false,
-             ]);
+            // Determine the amount to charge: offer price if accepted, otherwise service price
+            $amount = $offer ? $offer->offer_price : $service->price;
 
-             return response()->json([
-                 'status' => true,
-                 'data'   => $paymentIntent,
-             ], 200);
+            // Convert to cents for Stripe
+            $amountInCents = $amount * 100;
 
-         } catch (Exception $e) {
-             Log::error($e->getMessage());
-             return response()->json(['status' => false, 'message' => 'Error creating Payment Intent: ' . $e->getMessage()], 500);
-         }
-     }
+            // Create the payment intent
+            $paymentIntent = PaymentIntent::create([
+                'amount'         => $amountInCents,
+                'currency'       => 'usd',
+                'payment_method' => $request->payment_method,
+                'confirm'        => false,
+            ]);
 
-     // Order creation for service after payment success
-     public function paymentSuccess(Request $request)
-     {
-         $validator = Validator::make($request->all(), [
-             'payment_intent_id' => 'required|string',
-             'user_id'           => 'required|exists:users,id',
-             'service_id'        => 'required|exists:services,id',
-             'amount'            => 'required|numeric|min:0.01',
-             'start_date'        => 'required|date|after_or_equal:today',
-             'end_date'          => 'required|date|after_or_equal:start_date',
-             'start_time'        => 'required|date_format:H:i',
-             'end_time'          => 'required|date_format:H:i|after:start_time',
-         ]);
+            return response()->json([
+                'status' => true,
+                'data'   => $paymentIntent,
+            ], 200);
 
-         if ($validator->fails()) {
-             return response()->json(['status' => false, 'message' => $validator->errors()], 400);
-         }
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+            return response()->json(['status' => false, 'message' => 'Error creating Payment Intent: ' . $e->getMessage()], 500);
+        }
+    }
 
-         Stripe::setApiKey(env('STRIPE_SECRET'));
+    // Order creation for service after payment success
+    public function paymentSuccess(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'payment_intent_id' => 'required|string',
+            'user_id'           => 'required|exists:users,id',
+            'service_id'        => 'required|exists:services,id',
+            'start_date'        => 'required|date|after_or_equal:today',
+            'end_date'          => 'required|date|after_or_equal:start_date',
+            'start_time'        => 'required|date_format:H:i',
+            'end_time'          => 'required|date_format:H:i|after:start_time',
+        ]);
 
-         try {
-             // Retrieve the payment intent from Stripe
-             $paymentIntent = PaymentIntent::retrieve($request->payment_intent_id);
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => $validator->errors()], 400);
+        }
 
-             if ($paymentIntent->status === 'succeeded') {
-                 $service = Services::find($request->service_id);
-                 if (! $service) {
-                     return response()->json(['status' => false, 'message' => 'Service not found.'], 401);
-                 }
+        Stripe::setApiKey(env('STRIPE_SECRET'));
 
-                 $user = User::find($request->user_id);
-                 if (! $user) {
-                     return response()->json(['status' => false, 'message' => 'User not found.'], 401);
-                 }
+        try {
+            // Retrieve the payment intent from Stripe
+            $paymentIntent = PaymentIntent::retrieve($request->payment_intent_id);
 
-                 // Retrieve the platform fee from the Fee table
-                 $fee = Fees::first(); // Get the first record for the platform fee
-                 if (!$fee) {
-                     return response()->json(['status' => false, 'message' => 'Platform fee not set.'], 500);
-                 }
+            if ($paymentIntent->status === 'succeeded') {
+                $service = Services::find($request->service_id);
+                if (! $service) {
+                    return response()->json(['status' => false, 'message' => 'Service not found.'], 401);
+                }
 
-                 $platformFeePercentage = $fee->platform_fee; // Get the fee percentage from the database
-                 $platformFee = ($request->amount * $platformFeePercentage) / 100; // Platform fee
-                 $finalAmount = $request->amount - $platformFee; // Final amount after deducting platform fee
+                $user = User::find($request->user_id);
+                if (! $user) {
+                    return response()->json(['status' => false, 'message' => 'User not found.'], 401);
+                }
 
-                 // Create the order with the final amount and platform fee
-                 $order = Order::create([
-                     'user_id'        => $request->user_id,
-                     'provider_id'    => $service->provider_id,
-                     'service_id'     => $request->service_id,
-                     'transaction_id' => $paymentIntent->id,
-                     'amount'         => $finalAmount, // Final amount after deducting platform fee
-                     'platform_fee'   => $platformFee, // Platform fee applied
-                     'status'         => 'completed',
-                     'start_date'     => $request->start_date,
-                     'end_date'       => $request->end_date,
-                     'start_time'     => $request->start_time,
-                     'end_time'       => $request->end_time,
-                 ]);
+                // Check for an accepted offer
+                $offer = OfferService::where('service_id', $request->service_id)
+                    ->where('user_id', $request->user_id)
+                    ->where('offer_status', 'accepted')
+                    ->first();
 
-                 // Increment the service's booking count
-                 $service->increment('booking_count');
-                 $service->save();
+                // Use offer price if accepted, otherwise use normal service price
+                $amount = $offer ? $offer->offer_price : $service->price;
 
-                 return response()->json([
-                     'status'  => true,
-                     'message' => 'Payment recorded successfully',
-                     'data'    => $order,
-                 ], 200);
-             } else {
-                 return response()->json([
-                     'status'  => false,
-                     'message' => 'Payment failed or not yet confirmed. Status: ' . $paymentIntent->status,
-                 ], 400);
-             }
-         } catch (Exception $e) {
-             Log::error($e->getMessage());
-             return response()->json([
-                 'status'  => false,
-                 'message' => 'Payment recording failed: ' . $e->getMessage(),
-             ], 500);
-         }
-     }
+                // Retrieve the platform fee from the Fee table
+                $fee = Fees::first();
+                if (! $fee) {
+                    return response()->json(['status' => false, 'message' => 'Platform fee not set.'], 500);
+                }
+
+                $platformFeePercentage = $fee->platform_fee;
+                $platformFee           = ($amount * $platformFeePercentage) / 100;
+                $finalAmount           = $amount - $platformFee;
+
+                // Create the order with the correct pricing
+                $order = Order::create([
+                    'user_id'        => $request->user_id,
+                    'provider_id'    => $service->provider_id,
+                    'service_id'     => $request->service_id,
+                    'transaction_id' => $paymentIntent->id,
+                    'amount'         => $finalAmount,
+                    'platform_fee'   => $platformFee,
+                    'status'         => 'completed',
+                    'start_date'     => $request->start_date,
+                    'end_date'       => $request->end_date,
+                    'start_time'     => $request->start_time,
+                    'end_time'       => $request->end_time,
+                ]);
+
+                // Increment the service's booking count
+                $service->increment('booking_count');
+                $service->save();
+
+                return response()->json([
+                    'status'  => true,
+                    'message' => 'Payment recorded successfully',
+                    'data'    => $order,
+                ], 200);
+            } else {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'Payment failed or not yet confirmed. Status: ' . $paymentIntent->status,
+                ], 400);
+            }
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+            return response()->json([
+                'status'  => false,
+                'message' => 'Payment recording failed: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
 
     //order list
     public function orderlist()
