@@ -7,6 +7,7 @@ use App\Models\OfferService;
 use App\Models\Order;
 use App\Models\Services;
 use App\Models\User;
+use App\Notifications\NewOrderNotification;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -36,21 +37,31 @@ class OrderController extends Controller
                 return response()->json(['status' => false, 'message' => 'Service not found.'], 401);
             }
 
-            // Check if an offer exists for this service and if it's accepted
+            // Check if an offer exists and is accepted
             $offer = OfferService::where('service_id', $request->service_id)
                 ->where('user_id', auth()->id())
                 ->where('offer_status', 'accepted')
                 ->first();
 
-            // Determine the amount to charge: offer price if accepted, otherwise service price
+            // Use offer price if available, otherwise use service price
             $amount = $offer ? $offer->offer_price : $service->price;
 
-            // Convert to cents for Stripe
-            $amountInCents = $amount * 100;
+            // Get the platform fee percentage from the Fees table
+            $fee = Fees::first();
+            if (! $fee) {
+                return response()->json(['status' => false, 'message' => 'Platform fee not set.'], 500);
+            }
 
-            // Create the payment intent
+            // Calculate platform fee amount
+            $platformFee = ($amount * $fee->platform_fee) / 100;
+            $totalAmount = $amount + $platformFee; // Total charge
+
+            // Convert to cents for Stripe
+            $totalAmountInCents = $totalAmount * 100;
+
+            // Create the Payment Intent
             $paymentIntent = PaymentIntent::create([
-                'amount'         => $amountInCents,
+                'amount'         => $totalAmountInCents,
                 'currency'       => 'usd',
                 'payment_method' => $request->payment_method,
                 'confirm'        => false,
@@ -59,6 +70,13 @@ class OrderController extends Controller
             return response()->json([
                 'status' => true,
                 'data'   => $paymentIntent,
+                'cost'   =>
+                [
+                    'payment_intent' => $paymentIntent->id,
+                    'amount'         => $amount,
+                    'platform_fee'   => $platformFee,
+                    'total'          => $totalAmount,
+                ],
             ], 200);
 
         } catch (Exception $e) {
@@ -139,6 +157,9 @@ class OrderController extends Controller
                 $service->increment('booking_count');
                 $service->save();
 
+                $provider = $service->provider;
+                $provider->notify(new NewOrderNotification($order));
+
                 return response()->json([
                     'status'  => true,
                     'message' => 'Payment recorded successfully',
@@ -170,5 +191,33 @@ class OrderController extends Controller
         }
 
         return response()->json(['status' => true, 'data' => $order_list], 200);
+    }
+    //order details
+    public function orderDetails($id)
+    {
+        $order = Order::with(['user:id,full_name', 'service:id,title', 'provider:id,name'])->find($id);
+
+        if (! $order) {
+            return response()->json(['status' => false, 'message' => 'Order not found.'], 401);
+        }
+
+        $providerServices = $order->provider->services()->pluck('title')->toArray();
+
+        return response()->json([
+            'status' => true,
+            'data'   => [
+                'order_id'               => '#' . $order->id,
+                'time'                   => date('H:i A', strtotime($order->start_time)),
+                'date'                   => date('d-m-Y', strtotime($order->start_date)),
+                'service'                => $order->service->title,
+                'cost'                   => '$' . $order->amount,
+                'fee'                    => '$' . $order->platform_fee,
+                'total'                  => '$' . ($order->amount + $order->platform_fee),
+                'provider_id'            => $order->provider->id,
+                'provider_name'          => $order->provider->name,
+                'provider_services'      => $providerServices,
+                'service_provided_count' => count($providerServices) . '+',
+            ],
+        ], 200);
     }
 }

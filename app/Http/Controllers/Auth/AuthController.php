@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Mail\VerifyOTP;
 use App\Models\User;
+use App\Notifications\NewUserNotification;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -59,7 +60,7 @@ class AuthController extends Controller
         $role           = $request->role ?? 'user';
 
         $user = User::create([
-            'name'                 => $request->name,
+            'full_name'                 => $request->full_name,
             'email'                => $request->email,
             'provider_description' => $request->provider_description,
             'address'              => $request->address,
@@ -71,6 +72,13 @@ class AuthController extends Controller
             'otp_expires_at'       => $otp_expires_at,
             'status'               => 'inactive',
         ]);
+
+        //notify to admin
+        $admin = User::where('role', 'super_admin')->first();
+
+        if ($admin) {
+            $admin->notify(new NewUserNotification($user));
+        }
 
         try {
             Mail::to($user->email)->send(new VerifyOTP($otp));

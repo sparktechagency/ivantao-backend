@@ -110,6 +110,7 @@ Route::middleware(['auth:api', 'provider'])->group(function () {
     Route::post('request-withdraw', [WithdrawController::class, 'requestWithdraw']);
     Route::get('withdraw-money', [WithdrawController::class, 'getWithdrawMoney']);
     Route::get('withdraw-history', [WithdrawController::class, 'withdrawHistory']);
+    Route::get('get-transaction', [TransactionController::class, 'TransactionforProvider']);
 
     //add category
     Route::post('create-with-subcategory', [ServiceCategoryController::class, 'storeCategoryWithSubcategory']);
@@ -185,5 +186,6 @@ Route::middleware(['auth:api', 'user.provider'])->group(function () {
     //order
     Route::post('order-payment', [OrderController::class, 'createPaymentIntent']);
     Route::post('create-order', [OrderController::class, 'paymentSuccess']);
+    Route::get('order-details/{id}', [OrderController::class, 'orderDetails']);
 
 });

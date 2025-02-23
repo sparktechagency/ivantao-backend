@@ -1,0 +1,63 @@
+<?php
+
+namespace App\Notifications;
+
+use App\Models\User;
+use Carbon\Carbon;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
+
+class NewUserNotification extends Notification
+{
+    use Queueable;
+
+    protected $user;
+    protected $totalUsers;
+    protected $currentDateTime;
+
+    public function __construct(User $user)
+    {
+        $this->user = $user;
+        $this->totalUsers = User::count(); // Get the total number of users
+        $this->currentDateTime = Carbon::now()->format('Y-m-d H:i:s'); // Get current date and time
+    }
+
+    /**
+     * Get the notification's delivery channels.
+     *
+     * @return array<int, string>
+     */
+    public function via(object $notifiable): array
+    {
+        return ['database'];
+    }
+
+    /**
+     * Get the mail representation of the notification.
+     */
+    public function toMail(object $notifiable): MailMessage
+    {
+        return (new MailMessage)
+                    ->line('The introduction to the notification.')
+                    ->action('Notification Action', url('/'))
+                    ->line('Thank you for using our application!');
+    }
+
+    /**
+     * Get the array representation of the notification.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(object $notifiable): array
+    {
+        return [
+            'user_id' => $this->user->id,
+            'user_name' => $this->user->full_name,
+            'email' => $this->user->email,
+            'total_users' => $this->totalUsers,
+            'current_datetime' => $this->currentDateTime,
+        ];
+    }
+}
