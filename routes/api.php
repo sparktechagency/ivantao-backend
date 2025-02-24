@@ -3,12 +3,14 @@
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\NotificationController;
 use App\Http\Controllers\Message\MessageController;
+use App\Http\Controllers\Provider\DashboardProviderController;
 use App\Http\Controllers\Provider\ServiceCategoryController;
 use App\Http\Controllers\Provider\ServiceController;
 use App\Http\Controllers\Provider\WithdrawController;
 use App\Http\Controllers\SuperAdmin\ApplyFormController;
 use App\Http\Controllers\SuperAdmin\CareerController;
 use App\Http\Controllers\SuperAdmin\ContactUsController;
+use App\Http\Controllers\SuperAdmin\DashboardController;
 use App\Http\Controllers\SuperAdmin\SettingController;
 use App\Http\Controllers\SuperAdmin\TransactionController;
 use App\Http\Controllers\SuperAdmin\UserController;
@@ -20,6 +22,7 @@ use App\Http\Controllers\User\OfferPriceController;
 use App\Http\Controllers\User\OrderController;
 use App\Http\Controllers\User\ReportController;
 use App\Http\Controllers\User\ReviewController;
+
 use App\Http\Controllers\User\SubscribeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -52,6 +55,9 @@ Route::middleware(['auth:api', 'super_admin'])->group(function () {
     //subscriber list
     Route::get('subscribe-list', [SubscribeController::class, 'subscribeList']);
     Route::delete('subscribe-delete/{id}', [SubscribeController::class, 'deleteSubscribe']);
+
+    //dashboard
+    Route::get('total-dashboard',[DashboardController::class,'getDashboardStatistics']);
     //listing report
     Route::get('reportlist', [ReportController::class, 'reportlist']);
     Route::get('report-details/{id}', [ReportController::class, 'reportDetails']);
@@ -108,6 +114,10 @@ Route::middleware(['auth:api', 'super_admin'])->group(function () {
 
 //provider route
 Route::middleware(['auth:api', 'provider'])->group(function () {
+
+    //dashboard
+    Route::get('dashboard',[DashboardProviderController::class,'getDashboard']);
+
     //connected account
     Route::post('account-create', [ConnectedAccountController::class, 'createAccount'])->name('account-create');
     Route::get('account-refresh', [ConnectedAccountController::class, 'refreshAccount'])->name('account-refresh');
