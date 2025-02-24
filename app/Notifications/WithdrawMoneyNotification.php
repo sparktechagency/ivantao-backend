@@ -3,32 +3,24 @@
 namespace App\Notifications;
 
 use App\Models\User;
-use Carbon\Carbon;
+use App\Models\WithdrawMoney;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class NewUserNotification extends Notification
+class WithdrawMoneyNotification extends Notification
 {
     use Queueable;
 
-    protected $user;
-    protected $totalUsers;
-    protected $currentDateTime;
-
-    public function __construct(User $user)
+    public $withdrawal;
+    public $provider;
+    public function __construct(WithdrawMoney $withdrawal, User $provider)
     {
-        $this->user = $user;
-        $this->totalUsers = User::where('role', 'user')->count();
-        $this->currentDateTime = Carbon::now()->format('d/m/Y H:i a');
+        $this->withdrawal = $withdrawal;
+        $this->provider = $provider;
     }
 
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
-     */
     public function via(object $notifiable): array
     {
         return ['database'];
@@ -53,9 +45,12 @@ class NewUserNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'message' => $this->totalUsers . ' New User Registered',
-            'details' => 'Tawun Has ' . $this->totalUsers . ' New Members.',
-            'date_time' => $this->currentDateTime,
+            'provider_id' => $this->provider->id,
+            'provider_name' => $this->provider->full_name,
+            'image' => $this->provider->image,
+            'amount' => $this->withdrawal->amount,
+            'withdrawal_id' => $this->withdrawal->id,
+            'message' => 'Requested for money withdraw',
         ];
     }
 }

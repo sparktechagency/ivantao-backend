@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Auth\NotificationController;
 use App\Http\Controllers\Message\MessageController;
 use App\Http\Controllers\Provider\ServiceCategoryController;
 use App\Http\Controllers\Provider\ServiceController;
@@ -96,6 +97,13 @@ Route::middleware(['auth:api', 'super_admin'])->group(function () {
     //Transaction
     Route::get('transaction', [TransactionController::class, 'Transaction']);
 
+    //notification
+    Route::get('get-notify', [NotificationController::class, 'getnotification']);
+    Route::get('read-notify/{id}', [NotificationController::class, 'readNotification']);
+    Route::get('read-all-notify', [NotificationController::class, 'readAllNotification']);
+    //notification for withdraw money
+    Route::get('get-notify-withdraw', [NotificationController::class, 'WithdrawalNotify']);
+
 });
 
 //provider route
@@ -131,6 +139,11 @@ Route::middleware(['auth:api', 'provider'])->group(function () {
 
     //get order list
     Route::get('order-list', [OrderController::class, 'orderlist']);
+
+    //notification
+    Route::get('get-notification', [NotificationController::class, 'notification']);
+    Route::get('mark-notification/{id}', [NotificationController::class, 'markNotification']);
+    Route::get('mark-all-notification', [NotificationController::class, 'markAllNotification']);
 });
 
 Route::middleware(['auth:api', 'user'])->group(function () {

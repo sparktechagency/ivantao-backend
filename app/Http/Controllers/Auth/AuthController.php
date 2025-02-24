@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Mail\VerifyOTP;
 use App\Models\User;
+use App\Notifications\NewProviderNotification;
 use App\Notifications\NewUserNotification;
 use Exception;
 use Illuminate\Http\Request;
@@ -22,7 +23,7 @@ class AuthController extends Controller
     {
         $user = Auth::user();
 
-        if (!$user) {
+        if (! $user) {
             return response()->json(['status' => false, 'message' => 'User Not Found'], 422);
         }
 
@@ -60,7 +61,7 @@ class AuthController extends Controller
         $role           = $request->role ?? 'user';
 
         $user = User::create([
-            'full_name'                 => $request->full_name,
+            'full_name'            => $request->full_name,
             'email'                => $request->email,
             'provider_description' => $request->provider_description,
             'address'              => $request->address,
@@ -73,11 +74,14 @@ class AuthController extends Controller
             'status'               => 'inactive',
         ]);
 
-        //notify to admin
         $admin = User::where('role', 'super_admin')->first();
 
         if ($admin) {
-            $admin->notify(new NewUserNotification($user));
+            if ($user->role === 'user') {
+                $admin->notify(new NewUserNotification($user));
+            } elseif ($user->role === 'provider') {
+                $admin->notify(new NewProviderNotification($user));
+            }
         }
 
         try {

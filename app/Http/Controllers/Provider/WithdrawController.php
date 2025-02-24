@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Provider;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\WithdrawMoney;
+use App\Notifications\WithdrawMoneyNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -116,14 +117,18 @@ class WithdrawController extends Controller
             'status'      => 'pending',
             'provider_id' => $provider->id,
         ]);
+        // Dispatch notification to admin
+        $super_admin = User::where('role', 'super_admin')->first(); // Assuming 'admin' is the role
+        $super_admin->notify(new WithdrawMoneyNotification($withdraw_money, $provider));
+
 
         return response()->json([
             'status'  => true,
-            'message' => 'Withdrawal request submitted. Waiting for admin approval.',
+            'message' => 'Withdrawal request submitted with notification. Waiting for admin approval.',
             'data'    => $withdraw_money,
         ]);
     }
-//approved money withdraw by admin
+    //approved money withdraw by admin
     public function approveWithdraw($withdrawId)
     {
         Stripe::setApiKey(env('STRIPE_SECRET'));

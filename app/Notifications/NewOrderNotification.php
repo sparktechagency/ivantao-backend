@@ -1,9 +1,8 @@
 <?php
-
 namespace App\Notifications;
 
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -15,7 +14,7 @@ class NewOrderNotification extends Notification
 
     public function __construct($order)
     {
-        $this->order=$order;
+        $this->order = $order;
     }
 
     /**
@@ -34,9 +33,9 @@ class NewOrderNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
+            ->line('The introduction to the notification.')
+            ->action('Notification Action', url('/'))
+            ->line('Thank you for using our application!');
     }
 
     /**
@@ -46,12 +45,18 @@ class NewOrderNotification extends Notification
      */
     public function toArray(object $notifiable): array
     {
+        $time = Carbon::parse($this->order->created_at)->diffInDays(Carbon::now()) == 1
+        ? Carbon::parse($this->order->created_at)->format('g:ia, yesterday')
+        : Carbon::parse($this->order->created_at)->format('g:ia, today');
+
         return [
-            'order_id' => $this->order->id,
+            'message'       => 'New order',
+            'order_id'      => $this->order->id,
+            'time'          => $time,
             'service_title' => $this->order->service->title,
-            'user_name' => $this->order->user->full_name,
-            'start_date' => $this->order->start_date,
-            'start_time' => $this->order->start_time,
+            'user_name'     => $this->order->user->full_name,
+            'address'       => $this->order->user->address,
         ];
+
     }
 }

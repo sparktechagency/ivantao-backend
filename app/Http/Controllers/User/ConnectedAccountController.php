@@ -99,23 +99,39 @@ class ConnectedAccountController extends Controller
     }
 
     //delete
-    public function deleteAccount($providerId)
+    public function deleteAccount($accountId)
     {
-        $user = User::where('id', $providerId)->where('role', 'provider')->first();
-
-        if (! $user || ! $user->stripe_connect_id) {
-            return response()->json(['error' => 'Provider does not have a connected account.'], 401);
-        }
-
         try {
-            $account = Account::retrieve($user->stripe_connect_id);
+            Stripe::setApiKey(env('STRIPE_SECRET'));
+
+            $account = Account::retrieve($accountId);
             $account->delete();
 
-            $user->update(['stripe_connect_id' => null, 'completed_stripe_onboarding' => false]);
+            // Optionally, update your local database to reflect the deletion
+            User::where('stripe_connect_id', $accountId)->update(['stripe_connect_id' => null]);
 
-            return response()->json(['status' => true, 'message' => 'Connected account deleted successfully.']);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            return response()->json(['status' => true, 'message' => 'Account deleted successfully.']);
+        } catch (\Stripe\Exception\ApiErrorException $e) {
+            return response()->json(['status' => false, 'error' => $e->getMessage()], 500);
         }
     }
+    // public function deleteAccount($providerId)
+    // {
+    //     $user = User::where('id', $providerId)->where('role', 'provider')->first();
+
+    //     if (! $user || ! $user->stripe_connect_id) {
+    //         return response()->json(['error' => 'Provider does not have a connected account.'], 401);
+    //     }
+
+    //     try {
+    //         $account = Account::retrieve($user->stripe_connect_id);
+    //         $account->delete();
+
+    //         $user->update(['stripe_connect_id' => null, 'completed_stripe_onboarding' => false]);
+
+    //         return response()->json(['status' => true, 'message' => 'Connected account deleted successfully.']);
+    //     } catch (\Exception $e) {
+    //         return response()->json(['error' => $e->getMessage()], 500);
+    //     }
+    // }
 }

@@ -9,18 +9,15 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class NewUserNotification extends Notification
+class NewProviderNotification extends Notification
 {
     use Queueable;
 
-    protected $user;
-    protected $totalUsers;
+    protected $totalProviders;
     protected $currentDateTime;
-
-    public function __construct(User $user)
+    public function __construct()
     {
-        $this->user = $user;
-        $this->totalUsers = User::where('role', 'user')->count();
+        $this->totalProviders = User::where('role', 'provider')->count();
         $this->currentDateTime = Carbon::now()->format('d/m/Y H:i a');
     }
 
@@ -53,8 +50,8 @@ class NewUserNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'message' => $this->totalUsers . ' New User Registered',
-            'details' => 'Tawun Has ' . $this->totalUsers . ' New Members.',
+            'message' => $this->totalProviders . ' New Provider Registered',
+            'details' => 'Tawun Has ' . $this->totalProviders . ' New Providers.',
             'date_time' => $this->currentDateTime,
         ];
     }
