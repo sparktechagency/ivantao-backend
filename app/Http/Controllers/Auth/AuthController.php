@@ -58,12 +58,13 @@ class AuthController extends Controller
 
         $otp            = rand(100000, 999999);
         $otp_expires_at = now()->addMinutes(10);
-        $role           = $request->role ?? 'user';
+        $role = $request->provider_description ? 'provider' : 'user';
+
 
         $user = User::create([
             'full_name'            => $request->full_name,
             'email'                => $request->email,
-            'provider_description' => $request->provider_description,
+            'provider_description' => $role === 'provider' ? $request->provider_description : null,
             'address'              => $request->address,
             'contact'              => $request->contact,
             'password'             => Hash::make($request->password),

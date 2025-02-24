@@ -16,16 +16,25 @@ class MessageController extends Controller
         $validator = Validator::make($request->all(), [
             'receiver_id' => 'required|exists:users,id',
             'message'     => 'required|string',
+            'image'     => 'nullable',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['status' => false, 'message' => $validator->errors()], 422);
+        }
+        $new_name = null;
+        if ($request->hasFile('image')) {
+            $image     = $request->file('image');
+            $extension = $image->getClientOriginalExtension();
+            $new_name  = time() . '.' . $extension;
+            $image->move(public_path('uploads/message_images'), $new_name);
         }
 
         $message = Message::create([
             'sender_id'   => auth()->id(),
             'receiver_id' => $request->receiver_id,
             'message'     => $request->message,
+            'image'     => $new_name,
             'is_read'     => false,
         ]);
 

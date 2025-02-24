@@ -19,5 +19,9 @@ class Message extends Model
     {
         return $query->where('is_read', 0);
     }
+    public function getImageAttribute($image)
+    {
+        return asset('uploads/message_images/' . ($image ?? null));
+    }
 
 }

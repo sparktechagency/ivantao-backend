@@ -23,7 +23,7 @@ io.on("connection", (socket) => {
     }
 
     // Handle private messages
-    socket.on("private-message", ({ receiver_id, message }) => {
+    socket.on("private-message", ({ receiver_id, message,image }) => {
         const sender_id = Object.keys(users).find(key => users[key] === socket.id); // Get sender ID
 
         if (!sender_id) {
@@ -31,13 +31,14 @@ io.on("connection", (socket) => {
             return;
         }
 
-        console.log(`Private Message from ${sender_id} to ${receiver_id}: ${message}`);
+        console.log(`Private Message from ${sender_id} to ${receiver_id}: ${message},Image: ${image}`);
 
         // Send message only if receiver is online
         if (users[receiver_id]) {
             io.to(users[receiver_id]).emit("private-message", {
                 sender_id,
                 message,
+                image,
             });
         } else {
             console.log(`User ${receiver_id} is offline.`);
