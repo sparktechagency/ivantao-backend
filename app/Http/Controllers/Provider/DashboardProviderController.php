@@ -56,9 +56,9 @@ class DashboardProviderController extends Controller
         $tStatus = $tGrowth >= 0 ? 'up' : 'down';
         $eStatus = $eGrowth >= 0 ? 'up' : 'down';
 
-        $cGrowthText = round($cGrowth / 1000, 1) . 'k ' . ($cStatus == 'up' ? 'increase' : 'decrease') . ' than last 7 days';
-        $tGrowthText = round($tGrowth / 1000, 1) . 'k ' . ($tStatus == 'up' ? 'increase' : 'decrease') . ' than last 7 days';
-        $eGrowthText = round($eGrowth / 1000, 1) . 'k ' . ($eStatus == 'up' ? 'increase' : 'decrease') . ' than last 7 days';
+        $cGrowthText = round($cGrowth , 0) . 'k ' . ($cStatus == 'up' ? 'increase' : 'decrease') . ' than last ' . $period;
+        $tGrowthText = round($tGrowth , 0) . 'k ' . ($tStatus == 'up' ? 'increase' : 'decrease') . ' than last ' . $period;
+        $eGrowthText = round($eGrowth , 0) . 'k ' . ($eStatus == 'up' ? 'increase' : 'decrease') . ' than last ' . $period;
 
         $revenueData = DB::table('orders')
             ->selectRaw('DATE_FORMAT(created_at, "%Y-%m-%d") as date, SUM(amount) as revenue')

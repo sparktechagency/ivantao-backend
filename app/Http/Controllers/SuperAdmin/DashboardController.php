@@ -58,7 +58,7 @@ class DashboardController extends Controller
 
         $pGrowthText = round($pGrowth, 0) . 'k ' . ($pStatus == 'up' ? 'increase' : 'decrease') . ' than last ' . $period;
         $cGrowthText = round($cGrowth, 0) . 'k ' . ($cStatus == 'up' ? 'increase' : 'decrease') . ' than last ' . $period;
-        $eGrowthText = round($eGrowth, 0) . 'kk ' . ($eStatus == 'down' ? 'decrease' : 'increase') . ' than last ' . $period;
+        $eGrowthText = round($eGrowth, 0) . 'k ' . ($eStatus == 'down' ? 'decrease' : 'increase') . ' than last ' . $period;
 
         $revenueData = DB::table('orders')
             ->selectRaw('DATE_FORMAT(created_at, "%Y-%m-%d") as date, SUM(amount) as revenue')
