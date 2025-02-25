@@ -28,6 +28,7 @@ class UserSeeder extends Seeder
             'full_name' => 'Provider',
             'email' => 'provider@gmail.com',
             'role' => 'provider',
+            'uaepass_id' => '784-1999-1234567-8',
             'address' => 'Dhaka, Bangladesh',
             'password' => Hash::make('123456'),
             'status' => 'active',

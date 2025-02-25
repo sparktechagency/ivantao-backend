@@ -21,10 +21,11 @@ return new class extends Migration
             $table->string('address')->nullable();
             $table->string('contact')->nullable();
             $table->string('image')->nullable();
+            $table->string('uaepass_id')->nullable();
+            $table->string('google_id')->nullable();
             $table->string('password');
             $table->string('otp')->nullable();
             $table->timestamp('otp_expire_at')->nullable();
-            $table->string('google_id')->nullable();
             $table->string('stripe_connect_id')->nullable();
             $table->boolean('completed_stripe_onboarding')->default(false);
             $table->enum('status',['active','inactive'])->default('inactive');

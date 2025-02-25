@@ -32,6 +32,8 @@ class AuthController extends Controller
     //signup or registration
     public function register(Request $request)
     {
+        $isProvider = ($request->filled('provider_description') && $request->filled('uaepass_id'));
+
         $validator = Validator::make($request->all(), [
             'full_name'            => 'required|string|max:255',
             'email'                => 'required|string|email|unique:users,email',
@@ -41,7 +43,7 @@ class AuthController extends Controller
             'contact'              => 'nullable|string|max:15',
             'role'                 => 'nullable|string|in:super_admin,provider,user',
             'image'                => 'nullable|image',
-            'document'             => 'nullable',
+            'uaepass_id'           => 'nullable|string|unique:users,uaepass_id',
         ]);
 
         if ($validator->fails()) {
@@ -58,8 +60,7 @@ class AuthController extends Controller
 
         $otp            = rand(100000, 999999);
         $otp_expires_at = now()->addMinutes(10);
-        $role = $request->provider_description ? 'provider' : 'user';
-
+        $role = $isProvider ? 'provider' : 'user';
 
         $user = User::create([
             'full_name'            => $request->full_name,
@@ -67,6 +68,7 @@ class AuthController extends Controller
             'provider_description' => $role === 'provider' ? $request->provider_description : null,
             'address'              => $request->address,
             'contact'              => $request->contact,
+            'uaepass_id'           => $isProvider ? $request->uaepass_id : null, //just for provider
             'password'             => Hash::make($request->password),
             'role'                 => $role,
             'image'                => $new_name,
@@ -97,6 +99,7 @@ class AuthController extends Controller
             'message'      => 'Registration successful. Please verify your email!',
             'access_token' => $token,
             'token_type'   => 'bearer',
+            'data'   => $user,
         ], 200);
     }
 
