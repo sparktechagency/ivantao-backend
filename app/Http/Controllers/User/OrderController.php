@@ -3,7 +3,6 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\Fees;
-use App\Models\OfferService;
 use App\Models\Order;
 use App\Models\Services;
 use App\Models\User;
@@ -37,14 +36,7 @@ class OrderController extends Controller
                 return response()->json(['status' => false, 'message' => 'Service not found.'], 401);
             }
 
-            // Check if an offer exists and is accepted
-            $offer = OfferService::where('service_id', $request->service_id)
-                ->where('user_id', auth()->id())
-                ->where('offer_status', 'accepted')
-                ->first();
-
-            // Use offer price if available, otherwise use service price
-            $amount = $offer ? $offer->offer_price : $service->price;
+            $amount = $service->price;
 
             // Get the platform fee percentage from the Fees table
             $fee = Fees::first();
@@ -119,14 +111,7 @@ class OrderController extends Controller
                     return response()->json(['status' => false, 'message' => 'User not found.'], 401);
                 }
 
-                // Check for an accepted offer
-                $offer = OfferService::where('service_id', $request->service_id)
-                    ->where('user_id', $request->user_id)
-                    ->where('offer_status', 'accepted')
-                    ->first();
-
-                // Use offer price if accepted, otherwise use normal service price
-                $amount = $offer ? $offer->offer_price : $service->price;
+                $amount = $service->price;
 
                 // Retrieve the platform fee from the Fee table
                 $fee = Fees::first();

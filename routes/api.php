@@ -20,7 +20,6 @@ use App\Http\Controllers\User\CommunityForumController;
 use App\Http\Controllers\User\CommunityForumReportController;
 use App\Http\Controllers\User\ConnectedAccountController;
 use App\Http\Controllers\User\ContactWithAdminController;
-use App\Http\Controllers\User\OfferPriceController;
 use App\Http\Controllers\User\OrderController;
 use App\Http\Controllers\User\ReportController;
 use App\Http\Controllers\User\ReviewController;
@@ -156,11 +155,6 @@ Route::middleware(['auth:api', 'provider'])->group(function () {
     Route::post('update-service/{id}', [ServiceController::class, 'updateServices']);
     Route::delete('delete-service/{id}', [ServiceController::class, 'deleteService']);
 
-    //route for service
-    Route::get('get-offer-price', [OfferPriceController::class, 'getOfferPrice']);
-    Route::post('offer-price-status/{id}', [OfferPriceController::class, 'updateOfferStatus']);
-    Route::delete('delete-offer-price/{id}', [OfferPriceController::class, 'deleteOfferPrice']);
-
     //get order list
     Route::get('order-list', [OrderController::class, 'orderlist']);
 
@@ -176,8 +170,7 @@ Route::middleware(['auth:api', 'user'])->group(function () {
 
     //review
     Route::post('reviews', [ReviewController::class, 'createReview']);
-    //service offer
-    Route::post('price-offer', [OfferPriceController::class, 'offerPrice']);
+
     //create report
     Route::post('report', [ReportController::class, 'report']);
 
