@@ -4,6 +4,8 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\NotificationController;
 use App\Http\Controllers\Message\MessageController;
 use App\Http\Controllers\Provider\DashboardProviderController;
+use App\Http\Controllers\Provider\ExperienceController;
+use App\Http\Controllers\Provider\ScheduleController;
 use App\Http\Controllers\Provider\ServiceCategoryController;
 use App\Http\Controllers\Provider\ServiceController;
 use App\Http\Controllers\Provider\WithdrawController;
@@ -22,7 +24,6 @@ use App\Http\Controllers\User\OfferPriceController;
 use App\Http\Controllers\User\OrderController;
 use App\Http\Controllers\User\ReportController;
 use App\Http\Controllers\User\ReviewController;
-
 use App\Http\Controllers\User\SubscribeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -57,7 +58,7 @@ Route::middleware(['auth:api', 'super_admin'])->group(function () {
     Route::delete('subscribe-delete/{id}', [SubscribeController::class, 'deleteSubscribe']);
 
     //dashboard
-    Route::get('total-dashboard',[DashboardController::class,'getDashboardStatistics']);
+    Route::get('total-dashboard', [DashboardController::class, 'getDashboardStatistics']);
     //listing report
     Route::get('reportlist', [ReportController::class, 'reportlist']);
     Route::get('report-details/{id}', [ReportController::class, 'reportDetails']);
@@ -117,8 +118,19 @@ Route::middleware(['auth:api', 'provider'])->group(function () {
     //get profile for provider
     Route::get('provider-profile/{id}', [AuthController::class, 'providerProfile']);
 
+    //schedule
+    Route::post('add-schedule', [ScheduleController::class, 'addSchedule']);
+    Route::post('update-schedule/{id}', [ScheduleController::class, 'updateSchedule']);
+    Route::get('list-schedule', [ScheduleController::class, 'getSchedule']);
+
+    //experience
+    Route::post('add-experience', [ExperienceController::class, 'addExperience']);
+    Route::post('update-experience/{id}', [ExperienceController::class, 'updateExperience']);
+    Route::get('get-experience', [ExperienceController::class, 'getExperiences']);
+    Route::delete('delete-experience/{id}', [ExperienceController::class, 'deleteExperience']);
+
     //dashboard
-    Route::get('dashboard',[DashboardProviderController::class,'getDashboard']);
+    Route::get('dashboard', [DashboardProviderController::class, 'getDashboard']);
 
     //connected account
     Route::post('account-create', [ConnectedAccountController::class, 'createAccount'])->name('account-create');
@@ -168,8 +180,6 @@ Route::middleware(['auth:api', 'user'])->group(function () {
     Route::post('price-offer', [OfferPriceController::class, 'offerPrice']);
     //create report
     Route::post('report', [ReportController::class, 'report']);
-
-
 
 });
 Route::middleware(['auth:api', 'user.admin.provider'])->group(function () {
