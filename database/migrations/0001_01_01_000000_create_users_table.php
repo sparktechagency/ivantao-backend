@@ -18,6 +18,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->enum('role',['super_admin','provider','user'])->default('user');
             $table->longText('provider_description')->nullable();
+            $table->longText('about_yourself')->nullable();
             $table->string('address')->nullable();
             $table->string('contact')->nullable();
             $table->string('image')->nullable();

@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('service_categories', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('provider_id')->nullable()->constrained('users')->cascadeOnDelete();
             $table->string('name');
             $table->string('icon')->nullable();
             $table->timestamps();

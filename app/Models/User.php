@@ -33,8 +33,8 @@ class User extends Authenticatable implements JWTSubject
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password'          => 'hashed',
+            'email_verified_at'           => 'datetime',
+            'password'                    => 'hashed',
             'completed_stripe_onboarding' => 'bool',
 
             // 'document' => 'array',
@@ -75,6 +75,10 @@ class User extends Authenticatable implements JWTSubject
     public function withdrawMoney()
     {
         return $this->hasMany(WithdrawMoney::class, 'provider_id');
+    }
+    public function serviceCategories()
+    {
+        return $this->hasMany(ServiceCategory::class, 'provider_id');
     }
 
 }

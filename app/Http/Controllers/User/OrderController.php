@@ -220,4 +220,21 @@ class OrderController extends Controller
             ],
         ], 200);
     }
+    //order history for user
+    public function orderlistUser()
+    {
+        $user = auth()->user();
+
+        $order_list = Order::with(['service:id,title', 'provider:id,full_name'])
+            ->where('user_id', $user->id) // Fetch only orders of the logged-in user
+            ->orderBy('created_at', 'desc')
+            ->paginate();
+
+        if ($order_list->isEmpty()) {
+            return response()->json(['status' => false, 'message' => 'No orders found'], 404);
+        }
+
+        return response()->json(['status' => true, 'data' => $order_list], 200);
+    }
+
 }

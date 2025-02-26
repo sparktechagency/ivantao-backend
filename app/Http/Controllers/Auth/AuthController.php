@@ -29,6 +29,23 @@ class AuthController extends Controller
 
         return response()->json(['status' => true, 'data' => $user]);
     }
+    //get profile for provider
+    public function providerProfile($id)
+    {
+        $user = Auth::user();
+        if (! $user) {
+            return response()->json(['status' => false, 'message' => 'User Not Found'], 422);
+        }
+
+        // Fetch the authenticated user with their associated service categories
+        $userWithCategories = User::with('serviceCategories')->find($id);
+        if (! $userWithCategories) {
+            return response()->json(['status' => false, 'message' => 'User Not Found'], 422);
+        }
+
+        return response()->json(['status' => true, 'data' => $userWithCategories]);
+    }
+
     //signup or registration
     public function register(Request $request)
     {
@@ -60,7 +77,7 @@ class AuthController extends Controller
 
         $otp            = rand(100000, 999999);
         $otp_expires_at = now()->addMinutes(10);
-        $role = $isProvider ? 'provider' : 'user';
+        $role           = $isProvider ? 'provider' : 'user';
 
         $user = User::create([
             'full_name'            => $request->full_name,
@@ -99,7 +116,7 @@ class AuthController extends Controller
             'message'      => 'Registration successful. Please verify your email!',
             'access_token' => $token,
             'token_type'   => 'bearer',
-            'data'   => $user,
+            'data'         => $user,
         ], 200);
     }
 

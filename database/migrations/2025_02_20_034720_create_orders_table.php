@@ -19,8 +19,7 @@ return new class extends Migration
             $table->string('transaction_id')->nullable();
             $table->decimal('amount', 8, 2);
             $table->decimal('platform_fee', 8, 2);
-            $table->date('start_date')->nullable();
-            $table->date('end_date')->nullable();
+            $table->date('date')->nullable();
             $table->time('start_time')->nullable();
             $table->time('end_time')->nullable();
             $table->enum('status',['completed','canceled','pending'])->default('pending');

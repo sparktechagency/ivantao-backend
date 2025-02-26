@@ -37,7 +37,10 @@ class ServiceCategoryController extends Controller
                 $icon->move(public_path('uploads/category_icons'), $icon_name);
             }
 
-            $category = ServiceCategory::create([
+            // Get the authenticated provider's ID
+            $providerId = auth()->user()->id;
+            $category   = ServiceCategory::create([
+                'provider_id' => $providerId,
                 'name' => $request->category_name,
                 'icon' => $icon_name,
             ]);

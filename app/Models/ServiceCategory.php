@@ -1,17 +1,21 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
 class ServiceCategory extends Model
 {
-    protected $guarded=['id'];
+    protected $guarded = ['id'];
 
     public function subCategories()
     {
         return $this->hasMany(ServiceSubCategory::class);
     }
+    // public function provider()
+    // {
+    //     return $this->belongsTo(User::class,'provider_id');
+    // }
+
     public function getIconAttribute($icon)
     {
         $defaultIcon = 'default_user.png';

@@ -114,6 +114,8 @@ Route::middleware(['auth:api', 'super_admin'])->group(function () {
 
 //provider route
 Route::middleware(['auth:api', 'provider'])->group(function () {
+    //get profile for provider
+    Route::get('provider-profile/{id}', [AuthController::class, 'providerProfile']);
 
     //dashboard
     Route::get('dashboard',[DashboardProviderController::class,'getDashboard']);
@@ -154,6 +156,8 @@ Route::middleware(['auth:api', 'provider'])->group(function () {
     Route::get('get-notification', [NotificationController::class, 'notification']);
     Route::get('mark-notification/{id}', [NotificationController::class, 'markNotification']);
     Route::get('mark-all-notification', [NotificationController::class, 'markAllNotification']);
+
+    Route::get('order-list', [OrderController::class, 'orderlist']);
 });
 
 Route::middleware(['auth:api', 'user'])->group(function () {
@@ -164,6 +168,8 @@ Route::middleware(['auth:api', 'user'])->group(function () {
     Route::post('price-offer', [OfferPriceController::class, 'offerPrice']);
     //create report
     Route::post('report', [ReportController::class, 'report']);
+
+
 
 });
 Route::middleware(['auth:api', 'user.admin.provider'])->group(function () {
@@ -210,5 +216,7 @@ Route::middleware(['auth:api', 'user.provider'])->group(function () {
     Route::post('order-payment', [OrderController::class, 'createPaymentIntent']);
     Route::post('create-order', [OrderController::class, 'paymentSuccess']);
     Route::get('order-details/{id}', [OrderController::class, 'orderDetails']);
+    //when user and provider take service
+    Route::get('order-list-user', [OrderController::class, 'orderlistUser']);
 
 });
