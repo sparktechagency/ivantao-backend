@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Report extends Model
 {
     protected $guarded =['id'];
-    public function reportedUser()
+    public function provider()
     {
         return $this->belongsTo(User::class, 'reported_user_id');
     }

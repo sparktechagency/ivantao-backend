@@ -105,14 +105,13 @@ class CareerController extends Controller
             $career_list->where('job_role', 'LIKE', '%' . $request->search . '%');
         }
 
-        // Filter by category
-        if ($request->has('category')) {
-            $career_list->where('job_category', $request->category);
-        }
-
-        // Sort by newest or oldest posts
-        $sortOrder = $request->has('sort') && $request->sort === 'oldest' ? 'asc' : 'desc';
-        $career_list->orderBy('created_at', $sortOrder);
+        // Sort by the given sort parameter or default to 'newest'
+        $sortOrder = match ($request->sort) {
+            'oldest' => 'asc',
+            'category' => 'asc', // Sort by category
+            default => 'desc',   // Default: newest first
+        };
+        $career_list->orderBy($request->sort === 'category' ? 'job_category' : 'created_at', $sortOrder);
 
         $career_list = $career_list->paginate(10);
 
@@ -126,6 +125,7 @@ class CareerController extends Controller
             'data'    => $career_list,
         ], 200);
     }
+
     //job list for user
     public function jobList(Request $request)
     {
@@ -179,6 +179,5 @@ class CareerController extends Controller
             'posted_on' => $posted_on, // Add the date the job was posted
         ], 200);
     }
-    
 
 }

@@ -22,5 +22,9 @@ class CommunityForum extends Model
     {
         return Carbon::parse($this->created_at)->diffForHumans();
     }
+    public function category()
+    {
+        return $this->belongsTo(ServiceCategory::class);
+    }
 
 }

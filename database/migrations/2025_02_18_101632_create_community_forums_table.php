@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('community_forums', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained('users')->cascadeOnDelete();
-            $table->foreignId('sub_categories_id')->nullable()->constrained('service_sub_categories')->cascadeOnDelete();
+            $table->foreignId('categories_id')->nullable()->constrained('service_categories')->cascadeOnDelete();
             $table->string('title');
             $table->longText('comment');
             $table->string('image')->nullable();

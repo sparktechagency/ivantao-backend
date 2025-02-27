@@ -11,10 +11,10 @@ class ServiceCategory extends Model
     {
         return $this->hasMany(ServiceSubCategory::class);
     }
-    // public function provider()
-    // {
-    //     return $this->belongsTo(User::class,'provider_id');
-    // }
+    public function forums()
+    {
+        return $this->hasMany(CommunityForum::class);
+    }
 
     public function getIconAttribute($icon)
     {

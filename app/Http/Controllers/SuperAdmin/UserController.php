@@ -3,22 +3,23 @@ namespace App\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    //user list in super admin dashboard
-    public function userList()
+    //user list with filter in super admin dashboard
+    public function userList(Request $request)
     {
-        $userlist = User::where('role', 'user')->get();
-
-        if (! $userlist) {
-            return response()->json(['status' => false, 'message' => 'User Not Found'], 401);
-        }
+        $users = User::where('role', 'user')
+            ->when($request->name, fn($q) => $q->where('full_name', 'like', "%{$request->name}%"))
+            ->when($request->email, fn($q) => $q->where('email', 'like', "%{$request->email}%"))
+            ->when($request->user_id, fn($q) => $q->where('id', $request->user_id))
+            ->get();
 
         return response()->json([
-            'status'  => true,
-            'message' => 'User list fetched successfully!',
-            'data'    => $userlist,
+            'status'  => $users->isNotEmpty(),
+            'message' => $users->isNotEmpty() ? 'User list fetched successfully!' : 'No users found',
+            'data'    => $users,
         ], 200);
     }
     //user details in super admin dashboard
@@ -26,13 +27,10 @@ class UserController extends Controller
     {
         $user = User::where('role', 'user')->withCount('services')->find($id);
 
-        if (! $user) {
-            return response()->json(['status' => false, 'message' => 'User Not Found'], 401);
-        }
-
         return response()->json([
-            'status' => true,
-            'data'   => $user,
+            'status'  => (bool) $user,
+            'message' => $user ? 'User found' : 'No user found',
+            'data'    => $user ?? (object) [],
         ], 200);
     }
 //user delete
@@ -42,7 +40,7 @@ class UserController extends Controller
         $user = User::where('role', 'user')->find($id);
 
         if (! $user) {
-            return response()->json(['status' => false, 'message' => 'User Not Found'], 401);
+            return response()->json(['status' => false, 'message' => 'User Not Found'], 200);
         }
 
         $user->delete();
@@ -54,34 +52,30 @@ class UserController extends Controller
     }
 
     //provider list
-    public function providerList()
+    public function providerList(Request $request)
     {
-        $providerlist = User::where('role', 'provider')->get();
-
-        if (! $providerlist) {
-            return response()->json(['status' => false, 'message' => 'Provider Not Found'], 401);
-        }
+        $providers = User::where('role', 'provider')
+            ->when($request->name, fn($q) => $q->where('full_name', 'like', "%{$request->name}%"))
+            ->when($request->email, fn($q) => $q->where('email', 'like', "%{$request->email}%"))
+            ->when($request->user_id, fn($q) => $q->where('id', $request->user_id))
+            ->get();
 
         return response()->json([
-            'status'  => true,
-            'message' => 'Provider list fetched successfully!',
-            'data'    => $providerlist,
+            'status'  => $providers->isNotEmpty(),
+            'message' => $providers->isNotEmpty() ? 'Provider list fetched successfully!' : 'No providers found',
+            'data'    => $providers,
         ], 200);
     }
+
     //provider details in super admin dashboard
     public function providerDetails($id)
     {
-        $user = User::where('role', 'provider')
-        // ->withCount('servicesTaken')
-            ->find($id);
-
-        if (! $user) {
-            return response()->json(['status' => false, 'message' => 'User Not Found'], 401);
-        }
+        $provider = User::where('role', 'provider')->withCount('services')->find($id);
 
         return response()->json([
-            'status' => true,
-            'data'   => $user,
+            'status'  => (bool) $provider,
+            'message' => $provider ? 'Provider found' : 'No provider found',
+            'data'    => $user ?? (object) [],
         ], 200);
     }
     //provider delete
@@ -90,7 +84,7 @@ class UserController extends Controller
         $provider = User::where('role', 'provider')->find($id);
 
         if (! $provider) {
-            return response()->json(['status' => false, 'message' => 'Provider Not Found'], 401);
+            return response()->json(['status' => false, 'message' => 'Provider Not Found'], 200);
         }
 
         $provider->delete();

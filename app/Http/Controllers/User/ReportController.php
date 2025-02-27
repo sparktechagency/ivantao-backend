@@ -45,21 +45,22 @@ class ReportController extends Controller
     //report listing
     public function reportlist()
     {
-        $report_list = Report::with(['reportedUser:id,full_name,image','reporter:id,full_name,image','reportedService:id,title,service_type',])->paginate();
+        $report_list = Report::with(['provider:id,full_name,image','reporter:id,full_name,image','reportedService:id,title,service_type',])->paginate();
 
-        if ($report_list->isEmpty()) {
-            return response()->json(['status' => false, 'message' => 'There are no reports available.'], 401);
-        }
+        return response()->json([
+            'status'  => $report_list->isNotEmpty(),
+            'message' => $report_list->isNotEmpty() ? 'Report list fetched successfully!' : 'No reports found',
+            'data'    => $report_list,
+        ], 200);
 
-        return response()->json(['status' => true, 'data' => $report_list], 200);
     }
     //report details
     public function reportDetails(Request $request, $id)
     {
-        $reports = Report::with('reportedUser:id,full_name,image','reportedService:id,title,service_type,created_at')->find($id);
+        $reports = Report::with('provider:id,full_name,image','reportedService:id,title,service_type,created_at')->find($id);
 
         if (! $reports) {
-            return response()->json(['status' => false, 'message' => 'Reports Not Found'], 401);
+            return response()->json(['status' => false, 'message' => 'Reports Not Found'], 200);
         }
         return response()->json(['status'=>true,'data'=>$reports],200);
     }
@@ -68,7 +69,7 @@ class ReportController extends Controller
         $report = Report::find($id);
 
         if (! $report) {
-            return response()->json(['status' => false, 'message' => 'Report For Service Not Found'], 401);
+            return response()->json(['status' => false, 'message' => 'Report For Service Not Found'], 200);
         }
 
         $report->delete();

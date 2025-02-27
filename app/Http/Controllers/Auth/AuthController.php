@@ -49,23 +49,35 @@ class AuthController extends Controller
     //signup or registration
     public function register(Request $request)
     {
-        $isProvider = ($request->filled('provider_description') && $request->filled('uaepass_id'));
-
         $validator = Validator::make($request->all(), [
             'full_name'            => 'required|string|max:255',
             'email'                => 'required|string|email|unique:users,email',
-            'provider_description' => 'nullable|string',
             'password'             => 'required|string|min:6',
             'address'              => 'nullable|string|max:255',
             'contact'              => 'nullable|string|max:15',
             'role'                 => 'nullable|string|in:super_admin,provider,user',
             'image'                => 'nullable|image',
+            'provider_description' => 'nullable|string',
             'uaepass_id'           => 'nullable|string|unique:users,uaepass_id',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['status' => false, 'message' => $validator->errors()], 422);
         }
+
+        // Validate provider requirements
+        $isProviderDescriptionProvided = $request->filled('provider_description');
+        $isUaepassIdProvided           = $request->filled('uaepass_id');
+
+        if ($isProviderDescriptionProvided xor $isUaepassIdProvided) { //ensures both must be present or neither
+            return response()->json([
+                'status'  => false,
+                'message' => 'Both provider_description and uaepass_id are required for provider registration.',
+            ], 422);
+        }
+
+        // Determine role
+        $role = ($isProviderDescriptionProvided && $isUaepassIdProvided) ? 'provider' : 'user';
 
         $new_name = null;
         if ($request->hasFile('image')) {
@@ -77,15 +89,14 @@ class AuthController extends Controller
 
         $otp            = rand(100000, 999999);
         $otp_expires_at = now()->addMinutes(10);
-        $role           = $isProvider ? 'provider' : 'user';
 
         $user = User::create([
             'full_name'            => $request->full_name,
             'email'                => $request->email,
             'provider_description' => $role === 'provider' ? $request->provider_description : null,
+            'uaepass_id'           => $role === 'provider' ? $request->uaepass_id : null,
             'address'              => $request->address,
             'contact'              => $request->contact,
-            'uaepass_id'           => $isProvider ? $request->uaepass_id : null, //just for provider
             'password'             => Hash::make($request->password),
             'role'                 => $role,
             'image'                => $new_name,
@@ -94,8 +105,8 @@ class AuthController extends Controller
             'status'               => 'inactive',
         ]);
 
+        // Notify Admin
         $admin = User::where('role', 'super_admin')->first();
-
         if ($admin) {
             if ($user->role === 'user') {
                 $admin->notify(new NewUserNotification($user));
@@ -104,11 +115,13 @@ class AuthController extends Controller
             }
         }
 
+        // Send OTP Email
         try {
             Mail::to($user->email)->send(new VerifyOTP($otp));
         } catch (Exception $e) {
             Log::error($e->getMessage());
         }
+
         $token = JWTAuth::fromUser($user);
 
         return response()->json([
@@ -116,7 +129,7 @@ class AuthController extends Controller
             'message'      => 'Registration successful. Please verify your email!',
             'access_token' => $token,
             'token_type'   => 'bearer',
-            'data'         => $user,
+            // 'data'         => $user,
         ], 200);
     }
 

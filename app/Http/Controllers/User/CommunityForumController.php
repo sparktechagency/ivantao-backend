@@ -12,10 +12,10 @@ class CommunityForumController extends Controller
     public function forumPost(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'sub_categories_id' => 'required|exists:service_sub_categories,id',
-            'title'             => 'required|string|max:255',
-            'comment'           => 'required|string',
-            'image'             => 'nullable|file',
+            'categories_id' => 'required|exists:service_categories,id',
+            'title'         => 'required|string|max:255',
+            'comment'       => 'required|string',
+            'image'         => 'nullable|file',
         ]);
 
         if ($validator->fails()) {
@@ -36,11 +36,11 @@ class CommunityForumController extends Controller
         }
 
         $forum_post = CommunityForum::create([
-            'sub_categories_id' => $request->sub_categories_id,
-            'title'             => $request->title,
-            'comment'           => $request->comment,
-            'image'             => $forum_image,
-            'user_id'           => auth()->id(), // Assign the logged-in user's ID
+            'categories_id' => $request->categories_id,
+            'title'         => $request->title,
+            'comment'       => $request->comment,
+            'image'         => $forum_image,
+            'user_id'       => auth()->id(), // Assign the logged-in user's ID
         ]);
 
         $forum_post->load('user:id,full_name,image'); // Load user details
@@ -52,16 +52,24 @@ class CommunityForumController extends Controller
         ], 201);
     }
 
-    public function communityForumList()
+    public function communityForumList(Request $request)
     {
-        $forum_list = CommunityForum::with(['user:id,full_name,image'])->paginate();
+        $query = CommunityForum::with(['user:id,full_name,image']);
+
+        // filter by that category
+        if ($request->has('categories_id')) {
+            $query->where('categories_id', $request->categories_id); // Filter by category ID
+        }
+
+        $forum_list = $query->paginate();
 
         if ($forum_list->isEmpty()) {
-            return response()->json(['status' => false, 'message' => 'There is no data in the forum post list'], 401);
+            return response()->json(['status' => false, 'message' => 'No forum posts found in this category'], 200);
         }
 
         return response()->json(['status' => true, 'data' => $forum_list], 200);
     }
+
     public function deleteCommnityForum($id)
     {
         $forum = CommunityForum::find($id);

@@ -191,6 +191,9 @@ Route::middleware(['auth:api', 'user.admin.provider'])->group(function () {
 
 Route::middleware(['auth:api', 'user.provider'])->group(function () {
 
+    //apply form
+    Route::post('apply-form',[ApplyFormController::class,'applyForm']);
+
     //get all category and subcategory list
     Route::get('get-all-category', [ServiceCategoryController::class, 'getCategory']);
     Route::get('get-all-subcategory', [ServiceCategoryController::class, 'getSubCategory']);
