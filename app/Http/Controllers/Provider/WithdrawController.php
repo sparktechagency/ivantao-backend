@@ -104,9 +104,9 @@ class WithdrawController extends Controller
             $stripeBalance    = Balance::retrieve(['stripe_account' => $provider->stripe_connect_id]);
             $availableBalance = $stripeBalance->available[0]->amount / 100; // Convert cents to dollars
 
-            if ($request->amount > $availableBalance) {
-                return response()->json(['status' => false, 'message' => 'Insufficient balance in Stripe account.'], 401);
-            }
+            // if ($request->amount > $availableBalance) {
+            //     return response()->json(['status' => false, 'message' => 'Insufficient balance in Stripe account.'], 401);
+            // }
         } catch (\Exception $e) {
             return response()->json(['status' => false, 'message' => 'Failed to fetch Stripe balance.', 'error' => $e->getMessage()], 500);
         }

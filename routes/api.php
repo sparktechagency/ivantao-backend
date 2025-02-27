@@ -39,6 +39,8 @@ Route::group(['prefix' => 'auth'], function ($router) {
     Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
     Route::post('reset-password', [AuthController::class, 'resetPassword']);
     Route::post('resend-otp', [AuthController::class, 'resendOtp']);
+     //uae pass login
+     Route::post('uae-login',[AuthController::class,'socialLogin']);
     //subscribe
     Route::post('subscribe-join', [SubscribeController::class, 'subscribeJoin']);
 
@@ -114,6 +116,7 @@ Route::middleware(['auth:api', 'super_admin'])->group(function () {
 
 //provider route
 Route::middleware(['auth:api', 'provider'])->group(function () {
+
     //get profile for provider
     Route::get('provider-profile/{id}', [AuthController::class, 'providerProfile']);
 
@@ -173,6 +176,8 @@ Route::middleware(['auth:api', 'user'])->group(function () {
 
     //create report
     Route::post('report', [ReportController::class, 'report']);
+    //forum report
+    Route::post('forum-report', [CommunityForumReportController::class, 'forumReport']);
 
 });
 Route::middleware(['auth:api', 'user.admin.provider'])->group(function () {
@@ -192,7 +197,7 @@ Route::middleware(['auth:api', 'user.admin.provider'])->group(function () {
 Route::middleware(['auth:api', 'user.provider'])->group(function () {
 
     //apply form
-    Route::post('apply-form',[ApplyFormController::class,'applyForm']);
+    Route::post('apply-form', [ApplyFormController::class, 'applyForm']);
 
     //get all category and subcategory list
     Route::get('get-all-category', [ServiceCategoryController::class, 'getCategory']);
@@ -209,8 +214,6 @@ Route::middleware(['auth:api', 'user.provider'])->group(function () {
     //forum post
     Route::post('forum-post', [CommunityForumController::class, 'forumPost']);
 
-    //forum report
-    Route::post('forum-report', [CommunityForumReportController::class, 'forumReport']);
     //setting list
     Route::get('settings', [SettingController::class, 'settingList']);
 

@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
@@ -14,39 +13,39 @@ class DashboardController extends Controller
     public function getDashboardStatistics(Request $request)
     {
         $period = $request->input('period', 'weekly');
-        $now = now();
+        $now    = now();
 
         switch ($period) {
             case 'monthly':
-                $start = $now->copy()->startOfYear();
-                $end = $now->copy()->endOfMonth();
+                $start     = $now->copy()->startOfYear();
+                $end       = $now->copy()->endOfMonth();
                 $prevStart = $now->copy()->subYear()->startOfYear();
-                $prevEnd = $now->copy()->subYear()->endOfMonth();
+                $prevEnd   = $now->copy()->subYear()->endOfMonth();
                 break;
             case 'yearly':
-                $years = Order::selectRaw('YEAR(created_at) as year')->distinct()->orderBy('year')->pluck('year')->toArray();
+                $years       = Order::selectRaw('YEAR(created_at) as year')->distinct()->orderBy('year')->pluck('year')->toArray();
                 $currentYear = end($years);
-                $prevYear = count($years) > 1 ? $years[count($years) - 2] : null;
+                $prevYear    = count($years) > 1 ? $years[count($years) - 2] : null;
 
-                $start = Carbon::parse($currentYear . '-01-01')->startOfYear();
-                $end = Carbon::parse($currentYear . '-12-31')->endOfYear();
+                $start     = Carbon::parse($currentYear . '-01-01')->startOfYear();
+                $end       = Carbon::parse($currentYear . '-12-31')->endOfYear();
                 $prevStart = $prevYear ? Carbon::parse($prevYear . '-01-01')->startOfYear() : null;
-                $prevEnd = $prevYear ? Carbon::parse($prevYear . '-12-31')->endOfYear() : null;
+                $prevEnd   = $prevYear ? Carbon::parse($prevYear . '-12-31')->endOfYear() : null;
                 break;
             default: // weekly
-                $start = $now->copy()->startOfWeek();
-                $end = $now->copy()->endOfWeek();
+                $start     = $now->copy()->startOfWeek();
+                $end       = $now->copy()->endOfWeek();
                 $prevStart = $now->copy()->subWeek()->startOfWeek();
-                $prevEnd = $now->copy()->subWeek()->endOfWeek();
+                $prevEnd   = $now->copy()->subWeek()->endOfWeek();
         }
 
         $providers = User::where('role', 'provider')->whereBetween('created_at', [$start, $end])->count();
         $consumers = User::where('role', 'user')->whereBetween('created_at', [$start, $end])->count();
-        $earnings = Order::whereBetween('created_at', [$start, $end])->sum('amount') ?? 0;
+        $earnings  = Order::whereBetween('created_at', [$start, $end])->sum('amount') ?? 0;
 
         $prevProviders = $prevStart ? User::where('role', 'provider')->whereBetween('created_at', [$prevStart, $prevEnd])->count() : 0;
         $prevConsumers = $prevStart ? User::where('role', 'user')->whereBetween('created_at', [$prevStart, $prevEnd])->count() : 0;
-        $prevEarnings = $prevStart ? Order::whereBetween('created_at', [$prevStart, $prevEnd])->sum('amount') ?? 0 : 0;
+        $prevEarnings  = $prevStart ? Order::whereBetween('created_at', [$prevStart, $prevEnd])->sum('amount') ?? 0 : 0;
 
         $pGrowth = $prevProviders ? (($providers - $prevProviders) / $prevProviders) * 100 : 0;
         $cGrowth = $prevConsumers ? (($consumers - $prevConsumers) / $prevConsumers) * 100 : 0;
@@ -63,7 +62,7 @@ class DashboardController extends Controller
         $revenueData = DB::table('orders')
             ->selectRaw('DATE_FORMAT(created_at, "%Y-%m-%d") as date, SUM(amount) as revenue')
             ->whereBetween('created_at', [$start, $end])
-            ->groupBy('date')
+            ->groupBy(DB::raw('DATE_FORMAT(created_at, "%Y-%m-%d")'))
             ->orderBy('date')
             ->get()
             ->keyBy('date');
@@ -75,7 +74,7 @@ class DashboardController extends Controller
             }
         } elseif ($period == 'monthly') {
             for ($month = 1; $month <= 12; $month++) {
-                $date = Carbon::createFromDate(now()->year, $month, 1);
+                $date        = Carbon::createFromDate(now()->year, $month, 1);
                 $chartData[] = ['date' => $date->format('M'), 'revenue' => (float) ($revenueData[$date->toDateString()]->revenue ?? 0)];
             }
         } elseif ($period == 'yearly') {
@@ -91,25 +90,25 @@ class DashboardController extends Controller
             }
         }
 
-        $totalRevenue = array_sum(array_column($chartData, 'revenue'));
-        $prevRevenue = $prevStart ? Order::whereBetween('created_at', [$prevStart, $prevEnd])->sum('amount') ?? 0 : 0;
-        $revenueDiff = $totalRevenue - $prevRevenue;
+        $totalRevenue  = array_sum(array_column($chartData, 'revenue'));
+        $prevRevenue   = $prevStart ? Order::whereBetween('created_at', [$prevStart, $prevEnd])->sum('amount') ?? 0 : 0;
+        $revenueDiff   = $totalRevenue - $prevRevenue;
         $formattedDiff = ($revenueDiff >= 0 ? '+' : '-') . '$' . number_format(abs($revenueDiff) / 1000, 1) . 'k';
 
         $lastData = end($chartData);
-        $tooltip = ['revenue' => '$' . number_format(($lastData['revenue'] ?? 0) / 1000, 1) . 'k', 'date' => $end->format('d M, H:i')];
+        $tooltip  = ['revenue' => '$' . number_format(($lastData['revenue'] ?? 0) / 1000, 1) . 'k', 'date' => $end->format('d M, H:i')];
 
         return response()->json([
             'status' => 'success',
-            'data' => [
-                'period' => $period,
-                'providers' => ['total' => $providers, 'growth' => $pGrowthText, 'status' => $pStatus],
-                'consumers' => ['total' => $consumers, 'growth' => $cGrowthText, 'status' => $cStatus],
-                'earnings' => ['total' => $earnings, 'growth' => $eGrowthText, 'status' => $eStatus],
-                'chartData' => $chartData,
-                'totalRevenue' => '$' . number_format($totalRevenue / 1000, 1) . 'k',
+            'data'   => [
+                'period'            => $period,
+                'providers'         => ['total' => $providers, 'growth' => $pGrowthText, 'status' => $pStatus],
+                'consumers'         => ['total' => $consumers, 'growth' => $cGrowthText, 'status' => $cStatus],
+                'earnings'          => ['total' => $earnings, 'growth' => $eGrowthText, 'status' => $eStatus],
+                'chartData'         => $chartData,
+                'totalRevenue'      => '$' . number_format($totalRevenue / 1000, 1) . 'k',
                 'revenueDifference' => $formattedDiff,
-                'tooltipData' => $tooltip],
+                'tooltipData'       => $tooltip],
         ]);
     }
 }

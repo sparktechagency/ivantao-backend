@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
@@ -200,6 +201,60 @@ class AuthController extends Controller
             ],
         ], 200);
 
+    }
+    //uae pass login
+    public function socialLogin(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'full_name'  => 'required|string|max:255',
+            'email'      => 'required|email|max:255',
+            'uaepass_id' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $existingUser = User::where('email', $request->email)->first();
+
+        if ($existingUser) {
+            if ($existingUser->uaepass_id === $request->uaepass_id) {
+                // UAE Pass user already exists and matches
+                $token = JWTAuth::fromUser($existingUser);
+                return redirect()->route('user.dashboard')->with('success', 'Login successful!')->with('token', $token);
+            } elseif (is_null($existingUser->uaepass_id)) {
+                return redirect()->back()->withErrors(['email' => 'User already exists. Sign in manually.']);
+            } else {
+                // Update existing user with UAE Pass ID
+                $existingUser->update([
+                    'uaepass_id' => $request->uaepass_id,
+                ]);
+                $token = JWTAuth::fromUser($existingUser);
+                return redirect()->route('user.dashboard')->with('success', 'Login successful!')->with('token', $token);
+            }
+        }
+
+        // Create new user
+        $user = User::create([
+            'name'         => $request->name,
+            'email'        => $request->email,
+            'password'     => Hash::make(Str::random(16)),
+            'role'         => 'provider',
+            'uaepass_id'   => $request->uaepass_id,
+            'address'      => $request->address ?? null,
+            'verify_email' => true,
+            'status'       => 'active',
+        ]);
+
+        $token = JWTAuth::fromUser($user);
+
+        return response()->json([
+            'access_token' => $token,
+            'token_type'   => 'bearer',
+            'name'         => $user->name,
+            'email'        => $user->email,
+            'role'         => $user->role,
+        ]);
     }
 
     public function guard()

@@ -49,9 +49,8 @@ class CommunityForumReportController extends Controller
     public function forumReportDetails($forum_id)
     {
         $report_forum_details = CommunityForumReport::with([
-            'reporterUser:id,full_name',
-        ])
-            ->where('community_forums_id', $forum_id)
+            'reporterUser:id,full_name', 'reportedForum:id,title,comment,user_id', 'reportedForum.user:id,full_name,image',
+        ])->where('community_forums_id', $forum_id)
             ->get();
 
         if ($report_forum_details->isEmpty()) {
