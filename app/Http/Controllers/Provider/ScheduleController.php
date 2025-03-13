@@ -89,6 +89,6 @@ class ScheduleController extends Controller
             $schedule->days = $schedule->days ? json_decode($schedule->days) : null;
         });
 
-        return response()->json(['schedules' => $schedules]);
+        return response()->json(['satus'=>true,'schedules' => $schedules]);
     }
 }
