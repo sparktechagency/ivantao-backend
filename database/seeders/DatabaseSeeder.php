@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             ServiceSubCategorySeeder::class,
             ServiceSeeder::class,
             CareerSeeder::class,
+            ReviewSeeder::class,
         ]);
     }
 }

@@ -13,6 +13,6 @@ class ServiceSubCategorySeeder extends Seeder
      */
     public function run(): void
     {
-        ServiceSubCategory::factory(10)->create();
+        ServiceSubCategory::factory(5)->create();
     }
 }

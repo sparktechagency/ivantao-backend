@@ -2,17 +2,17 @@
 
 namespace Database\Seeders;
 
-use App\Models\Career;
+use App\Models\Review;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class CareerSeeder extends Seeder
+class ReviewSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        Career::factory(5)->create();
+        Review::factory(5)->create();
     }
 }
