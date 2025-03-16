@@ -179,24 +179,19 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
         if (! $user) {
-            return response()->json(['status' => false, 'message' => 'Email not found.'], 403);
+            return response()->json(['status' => false, 'message' => 'Email or password is incorrect.'], 403);
         }
 
         if (! $token = Auth::guard('api')->attempt($credentials)) {
-            return response()->json(['status' => false, 'message' => 'Invalid password.'], 401);
+            return response()->json(['status' => false, 'message' => 'Email or password is incorrect.'], 401);
         }
 
         return response()->json([
             'status'           => true,
+            'message'=>'Login Successfully',
             'access_token'     => $token,
             'token_type'       => 'bearer',
-            'user_information' => [
-                'name'              => $user->name,
-                'email'             => $user->email,
-                'role'              => $user->role,
-                'email_verified_at' => $user->email_verified_at,
-                'image'             => $user->image,
-            ],
+            'user_information' => $user
         ], 200);
 
     }
