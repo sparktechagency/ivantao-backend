@@ -117,8 +117,7 @@ Route::middleware(['auth:api', 'super_admin'])->group(function () {
 //provider route
 Route::middleware(['auth:api', 'provider'])->group(function () {
 
-    //get profile for provider
-    Route::get('provider-profile/{id}', [AuthController::class, 'providerProfile']);
+
 
     //schedule
     Route::post('add-schedule', [ScheduleController::class, 'addSchedule']);
@@ -195,6 +194,8 @@ Route::middleware(['auth:api', 'user.admin.provider'])->group(function () {
 });
 
 Route::middleware(['auth:api', 'user.provider'])->group(function () {
+    //get profile for provider
+    Route::get('provider-profile/{id}', [AuthController::class, 'providerProfile']);
 
     //apply form
     Route::post('apply-form', [ApplyFormController::class, 'applyForm']);
@@ -229,3 +230,9 @@ Route::middleware(['auth:api', 'user.provider'])->group(function () {
     Route::get('order-list-user', [OrderController::class, 'orderlistUser']);
 
 });
+//before a register user show this
+Route::get('get-all-category', [ServiceCategoryController::class, 'getCategory']);
+Route::get('get-all-services', [ServiceController::class, 'getAllService']);
+Route::get('get-services-details/{id}', [ServiceController::class, 'servicesDetails']);
+
+

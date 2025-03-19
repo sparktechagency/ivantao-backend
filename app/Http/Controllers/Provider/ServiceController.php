@@ -148,11 +148,14 @@ class ServiceController extends Controller
         // Apply sorting
         if ($sort == 'price_asc') {
             $service_list = $service_list->orderBy('price', 'asc');
-
         } elseif ($sort == 'date_asc') {
             $service_list = $service_list->orderBy('created_at', 'asc');
         } elseif ($sort == 'date_desc') {
             $service_list = $service_list->orderBy('created_at', 'desc');
+        } elseif ($sort == 'top_rated') {
+            // Top services will be sorted by highest rating first, then most reviews
+            $service_list = $service_list->orderByDesc('reviews_avg_rating')
+                                         ->orderByDesc('reviews_count');
         } else {
             $service_list = $service_list->orderBy('created_at', 'desc');
         }
@@ -166,6 +169,7 @@ class ServiceController extends Controller
 
         return response()->json(['status' => true, 'data' => $service_list], 200);
     }
+
 
     public function servicesDetails($id)
     {
