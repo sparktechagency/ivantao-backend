@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             ServiceSeeder::class,
             CareerSeeder::class,
             ReviewSeeder::class,
+            ForumSeeder::class
         ]);
     }
 }

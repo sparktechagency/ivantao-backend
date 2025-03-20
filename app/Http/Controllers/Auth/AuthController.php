@@ -322,15 +322,18 @@ class AuthController extends Controller
     {
 
         $request->validate([
+            'current_password' => 'required|string|',
             'new_password' => 'required|string|min:6|confirmed',
         ]);
 
         $user = Auth::user();
 
         if (! $user) {
-            return response()->json(['error' => 'User not authenticated.'], 401);
+            return response()->json(['status'=>false,'message' => 'User not authenticated.'], 401);
         }
-
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json(['status'=>false,'message' => 'Current password is incorrect.'],400);
+        }
         $user->password = Hash::make($request->new_password);
         $user->save();
 
@@ -378,7 +381,7 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
         if (! $user) {
-            return response()->json(['error' => 'User not found.'], 404);
+            return response()->json(['status'=>false,'message' => 'User not found.'], 200);
         }
 
         $user->password = bcrypt($request->password);
@@ -397,7 +400,7 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if (! $user) {
-            return response()->json(['error' => 'Email not registered.'], 404);
+            return response()->json(['error' => 'Email not registered.'], 401);
         }
 
         $otp = rand(100000, 999999);
