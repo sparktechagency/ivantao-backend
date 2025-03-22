@@ -3,7 +3,6 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\Review;
-use App\Models\Services;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -50,6 +49,30 @@ class ReviewController extends Controller
             'message' => 'Review added successfully. Previous review (if any) has been replaced.',
             'review'  => $review,
         ], 201);
+    }
+    public function reviewList(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'service_id' => 'required|exists:services,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status'  => false,
+                'message' => $validator->errors(),
+            ], 422);
+        }
+
+        $service_id = $validator->validated()['service_id'];
+
+        // Fetch reviews for the given service
+        $reviews = Review::with('user:id,full_name,image')
+        ->where('service_id', $service_id)->paginate(10);
+
+        return response()->json([
+            'status'  => 'success',
+            'reviews' => $reviews,
+        ], 200);
     }
 
 }

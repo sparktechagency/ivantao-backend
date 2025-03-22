@@ -234,5 +234,7 @@ Route::middleware(['auth:api', 'user.provider'])->group(function () {
 Route::get('get-all-category', [ServiceCategoryController::class, 'getCategory']);
 Route::get('get-all-services', [ServiceController::class, 'getAllService']);
 Route::get('get-services-details/{id}', [ServiceController::class, 'servicesDetails']);
+Route::get('get-all-review', [ReviewController::class, 'reviewList']);
+
 
 
