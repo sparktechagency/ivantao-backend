@@ -120,8 +120,8 @@ class ServiceController extends Controller
 
         return response()->json([
             'status'      => true,
-            'message'     => 'Subcategory updated successfully',
-            'subcategory' => $services,
+            'message'     => 'Service updated successfully',
+            'service' => $services,
         ]);
     }
     //delete service

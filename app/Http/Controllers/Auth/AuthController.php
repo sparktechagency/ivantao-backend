@@ -66,19 +66,14 @@ class AuthController extends Controller
             return response()->json(['status' => false, 'message' => $validator->errors()], 422);
         }
 
-        // Validate provider requirements
-        $isProviderDescriptionProvided = $request->filled('provider_description');
-        $isUaepassIdProvided           = $request->filled('uaepass_id');
-
-        if ($isProviderDescriptionProvided xor $isUaepassIdProvided) { //ensures both must be present or neither
-            return response()->json([
-                'status'  => false,
-                'message' => 'Both provider_description and uaepass_id are required for provider registration.',
-            ], 422);
-        }
-
         // Determine role
-        $role = ($isProviderDescriptionProvided && $isUaepassIdProvided) ? 'provider' : 'user';
+        $isProviderDescriptionProvided = $request->filled('provider_description');
+
+        if ($isProviderDescriptionProvided) {
+            $role = 'provider';
+        } else {
+            $role = 'user';
+        }
 
         $new_name = null;
         if ($request->hasFile('image')) {
@@ -95,7 +90,7 @@ class AuthController extends Controller
             'full_name'            => $request->full_name,
             'email'                => $request->email,
             'provider_description' => $role === 'provider' ? $request->provider_description : null,
-            'uaepass_id'           => $role === 'provider' ? $request->uaepass_id : null,
+            'uaepass_id'           => $request->uaepass_id,
             'address'              => $request->address,
             'contact'              => $request->contact,
             'password'             => Hash::make($request->password),
@@ -130,7 +125,6 @@ class AuthController extends Controller
             'message'      => 'Registration successful. Please verify your email!',
             'access_token' => $token,
             'token_type'   => 'bearer',
-            // 'data'         => $user,
         ], 200);
     }
 
@@ -271,6 +265,7 @@ class AuthController extends Controller
             'contact'              => 'nullable|string|max:16',
             'password'             => 'nullable|string|min:6|confirmed',
             'image'                => 'nullable|file',
+            'about_yourself'                => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -283,6 +278,7 @@ class AuthController extends Controller
         $user->address              = $validatedData['address'] ?? $user->address;
         $user->contact              = $validatedData['contact'] ?? $user->contact;
         $user->provider_description = $validatedData['provider_description'] ?? $user->provider_description;
+        $user->about_yourself = $validatedData['about_yourself'] ?? $user->about_yourself;
 
         if (! empty($validatedData['password'])) {
             $user->password = Hash::make($validatedData['password']);
