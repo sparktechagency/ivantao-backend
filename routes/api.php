@@ -52,6 +52,8 @@ Route::group(['prefix' => 'auth'], function ($router) {
     });
 
 });
+
+
 //super admin
 Route::middleware(['auth:api', 'super_admin'])->group(function () {
     //subscriber list
@@ -179,6 +181,8 @@ Route::middleware(['auth:api', 'user'])->group(function () {
     Route::post('forum-report', [CommunityForumReportController::class, 'forumReport']);
 
 });
+
+
 Route::middleware(['auth:api', 'user.admin.provider'])->group(function () {
 
     //message routes
@@ -192,6 +196,8 @@ Route::middleware(['auth:api', 'user.admin.provider'])->group(function () {
     Route::get('forum-list', [CommunityForumController::class, 'communityForumList']);
 
 });
+
+
 
 Route::middleware(['auth:api', 'user.provider'])->group(function () {
     //get profile for provider
@@ -230,6 +236,8 @@ Route::middleware(['auth:api', 'user.provider'])->group(function () {
     Route::get('order-list-user', [OrderController::class, 'orderlistUser']);
 
 });
+
+
 //before a register user show this
 Route::get('get-all-category', [ServiceCategoryController::class, 'getCategory']);
 Route::get('get-all-services', [ServiceController::class, 'getAllService']);

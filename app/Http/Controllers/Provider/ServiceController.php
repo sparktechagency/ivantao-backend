@@ -119,8 +119,8 @@ class ServiceController extends Controller
         $services->refresh()->load('provider:id,full_name,image', 'category:id,name,icon', 'subCategory:id,name,image');
 
         return response()->json([
-            'status'      => true,
-            'message'     => 'Service updated successfully',
+            'status'  => true,
+            'message' => 'Service updated successfully',
             'service' => $services,
         ]);
     }
@@ -141,7 +141,7 @@ class ServiceController extends Controller
     {
         $sort = $request->input('sort');
 
-        $service_list = Services::with(['provider:id,full_name,image','reviews:id,rating,user_id,service_id', 'reviews.user:id,full_name,image'])
+        $service_list = Services::with(['provider:id,full_name,image', 'reviews:id,rating,user_id,service_id', 'reviews.user:id,full_name,image'])
             ->withCount('reviews')
             ->withAvg('reviews', 'rating');
 
@@ -155,7 +155,7 @@ class ServiceController extends Controller
         } elseif ($sort == 'top_rated') {
             // Top services will be sorted by highest rating first, then most reviews
             $service_list = $service_list->orderByDesc('reviews_avg_rating')
-                                         ->orderByDesc('reviews_count');
+                ->orderByDesc('reviews_count');
         } else {
             $service_list = $service_list->orderBy('created_at', 'desc');
         }
@@ -170,10 +170,13 @@ class ServiceController extends Controller
         return response()->json(['status' => true, 'data' => $service_list], 200);
     }
 
-
     public function servicesDetails($id)
     {
-        $service = Services::with('provider:id,full_name,image')->find($id);
+        $service = Services::with([
+            'provider:id,full_name,image',
+            'serviceSubCategory.serviceCategory:id,name',
+            'serviceSubCategory:id,name',
+        ])->find($id);
 
         if (! $service) {
             return response()->json(['status' => false, 'message' => 'Service Not Found'], 401);
@@ -181,25 +184,36 @@ class ServiceController extends Controller
 
         $reviews = $service->reviews()->with('user:id,full_name,image')->get();
 
-        // Calculate the average rating and total number of reviews
         $averageRating = $reviews->isEmpty() ? 0 : $reviews->avg('rating');
         $totalReviews  = $reviews->count();
+
         $recommendedServices = Services::with('provider:id,full_name,image')
-        ->where('service_sub_categories_id', $service->service_sub_categories_id)
-        ->where('id', '!=', $service->id)
-        ->limit(3) // or however many you want to display
-        ->get();
+            ->where('service_sub_categories_id', $service->service_sub_categories_id)
+            ->where('id', '!=', $service->id)
+            ->limit(3)
+            ->get();
+        //for formatted document
+        $categoryName = $service->serviceCategory
+        ? $service->serviceCategory->name
+        : 'Unknown Category';
+
+        $subcategoryName = $service->serviceSubCategory
+        ? $service->serviceSubCategory->name
+        : 'Unknown Subcategory';
+
+        // Corrected string construction
+        $formattedDetails = $categoryName . ' / ' . $subcategoryName . ' / ' . $service->title;
 
         return response()->json([
             'status' => true,
             'data'   => [
-                'service'        => $service,
-                'reviews'        => $reviews,
-                'average_rating' => $averageRating,
-                'total_reviews'  => $totalReviews,
-                'recommended'     => $recommendedServices,
+                'service'           => $service,
+                'reviews'           => $reviews,
+                'average_rating'    => $averageRating,
+                'total_reviews'     => $totalReviews,
+                'recommended'       => $recommendedServices,
+                'formatted_details' => $formattedDetails,
             ],
         ], 200);
     }
-
 }

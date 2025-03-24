@@ -41,6 +41,13 @@ class Services extends Model
     {
         return $this->hasMany(Order::class, 'service_id');
     }
-
+    public function serviceSubCategory()
+    {
+        return $this->belongsTo(ServiceSubCategory::class, 'service_sub_categories_id');
+    }
+    public function serviceCategory()
+    {
+        return $this->belongsTo(ServiceCategory::class, 'service_category_id');
+    }
 
 }

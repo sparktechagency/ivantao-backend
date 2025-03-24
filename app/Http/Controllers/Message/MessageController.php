@@ -45,6 +45,8 @@ class MessageController extends Controller
         ], 200);
     }
 
+
+
     //get message receiver from sender
     public function getMessage(Request $request)
     {
@@ -72,6 +74,9 @@ class MessageController extends Controller
 
         return response()->json(['status' => true, 'data' => $messages], 200);
     }
+
+
+
     //read message for receiver
     public function readMessage(Request $request)
     {
@@ -95,6 +100,8 @@ class MessageController extends Controller
         return response(['status' => false, 'message' => 'No unread messages found.'], 422);
     }
 
+
+
     //serach user based on name
     public function searchUser(Request $request)
     {
@@ -110,6 +117,8 @@ class MessageController extends Controller
             'data'    => $users,
         ]);
     }
+
+
     //messagelist
     public function messageList(Request $request)
     {

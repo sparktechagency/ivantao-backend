@@ -23,4 +23,9 @@ class ServiceSubCategory extends Model
         $defaultImage = 'default_user.png';
         return asset('uploads/sub_category_images/' . ($image ?? $defaultImage));
     }
+    // ServiceSubCategory.php
+    public function serviceCategory()
+    {
+        return $this->belongsTo(ServiceCategory::class, 'service_category_id');
+    }
 }
