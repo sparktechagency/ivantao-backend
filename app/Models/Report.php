@@ -21,5 +21,9 @@ class Report extends Model
     {
         return $this->belongsTo(Services::class, 'service_id');
     }
+    public function reportedUser()
+    {
+        return $this->belongsTo(User::class, 'reported_user_id');
+    }
 
 }

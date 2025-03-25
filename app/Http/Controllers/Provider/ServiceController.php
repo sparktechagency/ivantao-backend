@@ -192,7 +192,7 @@ class ServiceController extends Controller
             ->where('id', '!=', $service->id)
             ->limit(3)
             ->get();
-        //for formatted document
+        //for formatted 
         $categoryName = $service->serviceCategory
         ? $service->serviceCategory->name
         : 'Unknown Category';
