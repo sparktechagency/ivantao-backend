@@ -33,7 +33,7 @@ class AuthController extends Controller
     //get profile for provider
     public function providerProfile($id)
     {
-        $user = Auth::user();
+        $user =User::find($id);
         if (! $user) {
             return response()->json(['status' => false, 'message' => 'User Not Found'], 422);
         }

@@ -19,7 +19,7 @@ class ServiceController extends Controller
             'title'                     => 'required|string|max:255',
             'description'               => 'required|string',
             'price'                     => 'required|string',
-            'service_type'              => 'nullable|in:virtual,in-person',
+            'service_type'              => 'nullable|in:virtual,in-person,both',
             'image'                     => 'nullable|image',
         ]);
 
@@ -192,7 +192,7 @@ class ServiceController extends Controller
             ->where('id', '!=', $service->id)
             ->limit(3)
             ->get();
-        //for formatted 
+        //for formatted
         $categoryName = $service->serviceCategory
         ? $service->serviceCategory->name
         : 'Unknown Category';

@@ -198,13 +198,16 @@ Route::middleware(['auth:api', 'user.admin.provider'])->group(function () {
 });
 
 
+Route::get('list-job', [CareerController::class, 'jobList']);
+Route::get('job-details/{id}', [CareerController::class, 'careerDetails']);
+Route::post('apply-form', [ApplyFormController::class, 'applyForm']);
 
+Route::get('provider-profile/{id}', [AuthController::class, 'providerProfile']);
+Route::post('contact-message', [ContactWithAdminController::class, 'contactMessage']);
 Route::middleware(['auth:api', 'user.provider'])->group(function () {
     //get profile for provider
-    Route::get('provider-profile/{id}', [AuthController::class, 'providerProfile']);
 
     //apply form
-    Route::post('apply-form', [ApplyFormController::class, 'applyForm']);
 
     //get all category and subcategory list
     Route::get('get-all-category', [ServiceCategoryController::class, 'getCategory']);
@@ -215,8 +218,6 @@ Route::middleware(['auth:api', 'user.provider'])->group(function () {
     Route::get('get-services-details/{id}', [ServiceController::class, 'servicesDetails']);
 
     //job list
-    Route::get('list-job', [CareerController::class, 'jobList']);
-    Route::get('job-details/{id}', [CareerController::class, 'careerDetails']);
 
     //forum post
     Route::post('forum-post', [CommunityForumController::class, 'forumPost']);
@@ -226,7 +227,6 @@ Route::middleware(['auth:api', 'user.provider'])->group(function () {
 
     //contact get
     Route::get('contact-show', [ContactUsController::class, 'contactShow']);
-    Route::post('contact-message', [ContactWithAdminController::class, 'contactMessage']);
 
     //order
     Route::post('order-payment', [OrderController::class, 'createPaymentIntent']);
