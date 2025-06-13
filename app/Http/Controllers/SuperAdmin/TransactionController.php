@@ -51,7 +51,7 @@ class TransactionController extends Controller
     {
         $order_list = Order::with([
             'user:id,full_name,image', 'service:id,title,image', 'provider:id,full_name',
-        ])->where('provider_id', auth()->id())->paginate();
+        ])->where('provider_id', auth()->id())->paginate(10);
 
         if ($order_list->isEmpty()) {
             return response()->json(['status' => false, 'message' => 'There is no data in the order list'], 502);
@@ -62,12 +62,12 @@ class TransactionController extends Controller
             $totalAmount = $order->amount + $platformFee; // Calculate the total amount
 
             return [
-                'service_title'      => $order->service->title,
+                'service_title'    => $order->service->title,
                 'image'            => $order->service->image,
-                'user_name'          => $order->user->full_name,
-                'provider'          => $order->provider->full_name,
-                'price'              => '$' . number_format($order->amount, 2),
-                'platform_fee'       => '$' . number_format($platformFee, 2),
+                'user_name'        => $order->user->full_name,
+                'provider'         => $order->provider->full_name,
+                'price'             => '$' . number_format($order->amount, 2),
+                'platform_fee'      => '$' . number_format($platformFee, 2),
                 'platform_fee_count' => '+8% ($' . number_format($platformFee, 2) . ')',
                 'total_amount'       => '$' . number_format($totalAmount, 2),
             ];

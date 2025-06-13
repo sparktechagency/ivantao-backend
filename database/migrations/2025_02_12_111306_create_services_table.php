@@ -20,7 +20,7 @@ return new class extends Migration
             $table->longText('description')->nullable();
             $table->string('price')->nullable();
             $table->string('image')->nullable();
-            $table->enum('service_type', ['virtual', 'in-person'])->default('in-person');
+            $table->enum('service_type', ['virtual', 'in-person','both'])->default('in-person');
             $table->timestamps();
         });
     }

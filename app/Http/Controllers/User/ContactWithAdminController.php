@@ -36,9 +36,8 @@ class ContactWithAdminController extends Controller
         $superAdmin = User::where('role', 'super_admin')->first();
         if ($superAdmin) {
             // Send an email to the super admin
-            Mail::to($superAdmin->email)->send(new ContactFormSubmitted($contact));
+            Mail::to($superAdmin->email)->queue(new ContactFormSubmitted($contact));
         }
-
         return response()->json(['status' => true, 'message' => 'Your message has been sent successfully.'], 200);
     }
 }
