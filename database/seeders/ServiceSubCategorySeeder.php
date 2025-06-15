@@ -14,14 +14,10 @@ class ServiceSubCategorySeeder extends Seeder
      */
     public function run(): void
     {
-        // Get the first available service category. You may customize this logic.
         $serviceCategory = ServiceCategory::first();
-
         if (!$serviceCategory) {
-            // If no service category is found, exit the seeder.
             return;
         }
-
         // Create some sample service sub-categories
         ServiceSubCategory::create([
             'service_category_id' => $serviceCategory->id,
