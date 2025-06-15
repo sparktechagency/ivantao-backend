@@ -38,9 +38,9 @@ class ServiceCategoryController extends Controller
             }
 
             // Get the authenticated provider's ID
-            $providerId = auth()->user()->id;
+            // $providerId = auth()->user()->id;
             $category   = ServiceCategory::create([
-                'provider_id' => $providerId,
+                // 'provider_id' => $providerId,
                 'name' => $request->category_name,
                 'icon' => $icon_name,
             ]);

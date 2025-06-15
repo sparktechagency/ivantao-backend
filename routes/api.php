@@ -148,11 +148,11 @@ Route::middleware(['auth:api', 'provider'])->group(function () {
     Route::get('get-transaction', [TransactionController::class, 'TransactionforProvider']);
 
     //add category
-    Route::post('create-with-subcategory', [ServiceCategoryController::class, 'storeCategoryWithSubcategory']);
-    Route::post('update-with-subcategory/{id}', [ServiceCategoryController::class, 'UpdateCategoryWithSubcategory']);
-    Route::post('update-subcategory/{id}', [ServiceCategoryController::class, 'updateSubcategory']);
-    Route::delete('delete-subcategory/{id}', [ServiceCategoryController::class, 'deleteSubcategory']);
-    Route::delete('delete-category/{id}', [ServiceCategoryController::class, 'deleteServiceCategory']);
+    // Route::post('create-with-subcategory', [ServiceCategoryController::class, 'storeCategoryWithSubcategory']);
+    // Route::post('update-with-subcategory/{id}', [ServiceCategoryController::class, 'UpdateCategoryWithSubcategory']);
+    // Route::post('update-subcategory/{id}', [ServiceCategoryController::class, 'updateSubcategory']);
+    // Route::delete('delete-subcategory/{id}', [ServiceCategoryController::class, 'deleteSubcategory']);
+    // Route::delete('delete-category/{id}', [ServiceCategoryController::class, 'deleteServiceCategory']);
 
     //route for service
     Route::post('create-service', [ServiceController::class, 'createServices']);
@@ -191,10 +191,14 @@ Route::middleware(['auth:api', 'user.admin.provider'])->group(function () {
     Route::get('read-message', [MessageController::class, 'readMessage']);
     Route::get('search-user', [MessageController::class, 'searchUser']);
     Route::get('message-list', [MessageController::class, 'messageList']);
-
     //forum list
     Route::get('forum-list', [CommunityForumController::class, 'communityForumList']);
 
+    Route::post('create-with-subcategory', [ServiceCategoryController::class, 'storeCategoryWithSubcategory']);
+    Route::post('update-with-subcategory/{id}', [ServiceCategoryController::class, 'UpdateCategoryWithSubcategory']);
+    Route::post('update-subcategory/{id}', [ServiceCategoryController::class, 'updateSubcategory']);
+    Route::delete('delete-subcategory/{id}', [ServiceCategoryController::class, 'deleteSubcategory']);
+    Route::delete('delete-category/{id}', [ServiceCategoryController::class, 'deleteServiceCategory']);
 });
 
 
