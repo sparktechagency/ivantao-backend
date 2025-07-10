@@ -160,6 +160,13 @@ class ServiceController extends Controller
             $service_list = $service_list->orderBy('created_at', 'desc');
         }
 
+        if($request->category_id){
+             $service_list = $service_list->where('service_category_id', $request->category_id);
+        }
+        if($request->subcategory_id){
+             $service_list = $service_list->where('service_sub_categories_id', $request->subcategory_id);
+        }
+
         // Paginate the result
         $service_list = $service_list->paginate();
 

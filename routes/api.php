@@ -39,8 +39,8 @@ Route::group(['prefix' => 'auth'], function ($router) {
     Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
     Route::post('reset-password', [AuthController::class, 'resetPassword']);
     Route::post('resend-otp', [AuthController::class, 'resendOtp']);
-     //uae pass login
-     Route::post('uae-login',[AuthController::class,'socialLogin']);
+    //uae pass login
+    Route::post('uae-login', [AuthController::class, 'socialLogin']);
     //subscribe
     Route::post('subscribe-join', [SubscribeController::class, 'subscribeJoin']);
 
@@ -52,7 +52,6 @@ Route::group(['prefix' => 'auth'], function ($router) {
     });
 
 });
-
 
 //super admin
 Route::middleware(['auth:api', 'super_admin'])->group(function () {
@@ -119,8 +118,6 @@ Route::middleware(['auth:api', 'super_admin'])->group(function () {
 //provider route
 Route::middleware(['auth:api', 'provider'])->group(function () {
 
-
-
     //schedule
     Route::post('add-schedule', [ScheduleController::class, 'addSchedule']);
     Route::post('update-schedule/{id}', [ScheduleController::class, 'updateSchedule']);
@@ -182,7 +179,6 @@ Route::middleware(['auth:api', 'user'])->group(function () {
 
 });
 
-
 Route::middleware(['auth:api', 'user.admin.provider'])->group(function () {
 
     //message routes
@@ -199,8 +195,12 @@ Route::middleware(['auth:api', 'user.admin.provider'])->group(function () {
     Route::post('update-subcategory/{id}', [ServiceCategoryController::class, 'updateSubcategory']);
     Route::delete('delete-subcategory/{id}', [ServiceCategoryController::class, 'deleteSubcategory']);
     Route::delete('delete-category/{id}', [ServiceCategoryController::class, 'deleteServiceCategory']);
-});
 
+    Route::post('add-category', [ServiceCategoryController::class, 'addCategory']);
+    Route::post('add-subcategory', [ServiceCategoryController::class, 'addSubCategory']);
+    Route::get('get-category-wise-subcategory/{id}', [ServiceCategoryController::class, 'getCategoryWiseSubcategory']);
+
+});
 
 Route::get('list-job', [CareerController::class, 'jobList']);
 Route::get('job-details/{id}', [CareerController::class, 'careerDetails']);
@@ -241,12 +241,8 @@ Route::middleware(['auth:api', 'user.provider'])->group(function () {
 
 });
 
-
 //before a register user show this
 Route::get('get-all-category', [ServiceCategoryController::class, 'getCategory']);
 Route::get('get-all-services', [ServiceController::class, 'getAllService']);
 Route::get('get-services-details/{id}', [ServiceController::class, 'servicesDetails']);
 Route::get('get-all-review', [ReviewController::class, 'reviewList']);
-
-
-

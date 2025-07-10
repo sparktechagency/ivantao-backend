@@ -39,7 +39,7 @@ class ServiceCategoryController extends Controller
 
             // Get the authenticated provider's ID
             // $providerId = auth()->user()->id;
-            $category   = ServiceCategory::create([
+            $category = ServiceCategory::create([
                 // 'provider_id' => $providerId,
                 'name' => $request->category_name,
                 'icon' => $icon_name,
@@ -304,5 +304,75 @@ class ServiceCategoryController extends Controller
 
         return response()->json(['status' => true, 'data' => $subcategory_list], 200);
     }
+    public function addCategory(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'icon' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
+        ]);
 
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => $validator->errors()], 422);
+        }
+        $icon_name = null;
+
+        if ($request->hasFile('icon')) {
+            $icon      = $request->file('icon');
+            $icon_name = uniqid() . '.' . $icon->getClientOriginalExtension();
+            $icon->move(public_path('uploads/category_icons'), $icon_name);
+        }
+
+        $category = ServiceCategory::create([
+            'name' => $request->name,
+            'icon' => $icon_name,
+        ]);
+
+        return response()->json([
+            'status'  => true,
+            'message' => 'Category created successfully',
+            'data'    => $category,
+        ]);
+    }
+
+    public function addSubCategory(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'category_id' => 'required|exists:service_categories,id',
+            'name'        => 'required|string|max:255',
+            'icon'        => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => $validator->errors()], 422);
+        }
+        $icon_name = null;
+
+        if ($request->hasFile('icon')) {
+            $icon      = $request->file('icon');
+            $icon_name = uniqid() . '.' . $icon->getClientOriginalExtension();
+            $icon->move(public_path('uploads/sub_category_images'), $icon_name);
+        }
+
+        $subcategory = ServiceSubCategory::create([
+            'service_category_id' => $request->category_id,
+            'name'                => $request->name,
+            'image'               => $icon_name,
+        ]);
+
+        return response()->json([
+            'status'  => true,
+            'message' => 'Subcategory created successfully',
+            'data'    => $subcategory,
+        ]);
+    }
+
+    public function getCategoryWiseSubcategory($id)
+    {
+        $subcategories = ServiceSubCategory::where('service_category_id', $id)->get();
+        return response()->json([
+            'status'  => true,
+            'message' => 'Subcategory retreived successfully',
+            'data'    => $subcategories,
+        ]);
+    }
 }
