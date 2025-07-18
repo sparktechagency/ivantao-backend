@@ -12,7 +12,7 @@ class User extends Authenticatable implements JWTSubject
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, SoftDeletes;
 
-    protected $dates   = ['deleted_at'];
+    protected $dates = ['deleted_at'];
     protected $guarded = ['id'];
 
     /**
@@ -33,8 +33,8 @@ class User extends Authenticatable implements JWTSubject
     protected function casts(): array
     {
         return [
-            'email_verified_at'           => 'datetime',
-            'password'                    => 'hashed',
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
             'completed_stripe_onboarding' => 'bool',
 
             // 'document' => 'array',
@@ -51,7 +51,7 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
-// Accessor in User model
+    // Accessor in User model
     public function getImageAttribute($image)
     {
         $defaultImage = 'default_user.png';
@@ -79,6 +79,14 @@ class User extends Authenticatable implements JWTSubject
     public function serviceCategories()
     {
         return $this->hasMany(ServiceCategory::class, 'provider_id');
+    }
+    public function provider_services()
+    {
+        return $this->hasMany(ProviderService::class);
+    }
+    public function getDaysAttribute($value)
+    {
+        return json_decode($value);
     }
 
 }

@@ -33,13 +33,7 @@ class AuthController extends Controller
     //get profile for provider
     public function providerProfile($id)
     {
-        $user =User::find($id);
-        if (! $user) {
-            return response()->json(['status' => false, 'message' => 'User Not Found'], 422);
-        }
-
-        // Fetch the authenticated user with their associated service categories
-        $userWithCategories = User::with('serviceCategories')->find($id);
+        $userWithCategories = User::with('provider_services.service_category')->find($id);
         if (! $userWithCategories) {
             return response()->json(['status' => false, 'message' => 'User Not Found'], 422);
         }

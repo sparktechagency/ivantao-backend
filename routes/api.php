@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\NotificationController;
 use App\Http\Controllers\Message\MessageController;
 use App\Http\Controllers\Provider\DashboardProviderController;
 use App\Http\Controllers\Provider\ExperienceController;
+use App\Http\Controllers\Provider\ProviderController;
 use App\Http\Controllers\Provider\ScheduleController;
 use App\Http\Controllers\Provider\ServiceCategoryController;
 use App\Http\Controllers\Provider\ServiceController;
@@ -165,6 +166,15 @@ Route::middleware(['auth:api', 'provider'])->group(function () {
     Route::get('mark-all-notification', [NotificationController::class, 'markAllNotification']);
 
     Route::get('order-list', [OrderController::class, 'orderlist']);
+
+
+
+    Route::post('add-provider-service', [ProviderController::class, 'addProviderService']);
+    Route::delete('delete-provider-service/{id}', [ProviderController::class, 'deleteProviderService']);
+    Route::post('addupdate-working-hour', [ProviderController::class, 'addupdateWorkingHour']);
+
+
+
 });
 
 Route::middleware(['auth:api', 'user'])->group(function () {
