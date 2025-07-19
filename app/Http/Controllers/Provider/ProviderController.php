@@ -21,10 +21,17 @@ class ProviderController extends Controller
         if ($validator->fails()) {
             return response()->json(['status' => false, 'message' => $validator->errors()], 422);
         }
+        $already_exist=ProviderService::where('user_id',Auth::id())->where('service_category_id',$request->category_id)->exists();
+        if($already_exist){
+               return response()->json([
+            'status' => true,
+            'message' => 'This provider already have this service',
+            'data' => null,
+        ], 201);
+        }
         $service = ProviderService::create([
             'user_id' => Auth::user()->id,
             'service_category_id' => $request->category_id
-
         ]);
 
         return response()->json([
